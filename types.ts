@@ -1,3 +1,5 @@
+
+
 export interface Experience {
   id: string;
   company: string;
@@ -70,6 +72,17 @@ export interface Conversation {
   unreadCount: number;
   status: MessageStatus;
   messages: Message[];
+  // Added createdAt property to satisfy type requirements in firebaseService.ts
+  createdAt: number;
+}
+
+export interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
 }
 
 export interface SOCResult {

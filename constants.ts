@@ -1,5 +1,8 @@
 import { ProfileContent } from './types';
 
+export const ADMIN_PASSWORD = "admin123";
+export const RECOVERY_CODE = "recovery";
+
 export const INITIAL_PROFILE: ProfileContent = {
   name: "Sai Medicherla",
   headline: "AI-Based No-Code Operator | Workflow Optimiser | Ex-Insurance Analyst",
@@ -100,6 +103,20 @@ export const INITIAL_PROFILE: ProfileContent = {
       description: "Group focus tool for a peer job seeking circle with custom intervals. Posts live countdowns and breaks in a shared channel for lightweight accountability.",
       stack: ["Discord API", "Automation"],
       link: "https://github.com/saicbm98"
+    },
+    {
+      id: '2',
+      name: "LinkedIn Replacer",
+      description: "A professional profile web app with integrated messaging, AI profile Q&A, and SOC evaluator. Features a clean, network-style UI for recruiters and hiring managers.",
+      stack: ["React", "TypeScript", "Tailwind CSS", "Gemini API"],
+      link: "https://github.com/saicbm98"
+    },
+    {
+      id: '3',
+      name: "QueSense",
+      description: "QueueSense is an AI helper app for support teams at B2B SaaS companies. It reads support tickets, shows the important details about each customer, and writes reply drafts so agents can clear the queue faster with less effort. It is a demo and portfolio project, but it should feel like a real support tool for a mid sized B2B SaaS company.",
+      stack: ["React", "Firebase", "Tailwind"],
+      link: "https://github.com/saicbm98/quesense"
     }
   ],
   skills: [

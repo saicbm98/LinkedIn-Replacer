@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store';
 import { Link } from 'react-router-dom';
-import { MapPin, Link as LinkIcon, Send, Plus, Camera, Pencil, Briefcase, ChevronDown, Printer, Github, Mail, Zap, Bot, Rocket, ArrowRight, X } from 'lucide-react';
+import { MapPin, Link as LinkIcon, Send, Plus, Camera, Pencil, Briefcase, ChevronDown, Printer, Github, Mail, Zap, Bot, Rocket, ArrowRight, X, AlertTriangle } from 'lucide-react';
 import AIChatWidget from './AIChatWidget';
 
 const LogoImage = ({ logoUrl, name }: { logoUrl?: string, name: string }) => {
@@ -26,7 +26,7 @@ const LogoImage = ({ logoUrl, name }: { logoUrl?: string, name: string }) => {
 };
 
 const Profile: React.FC = () => {
-  const { profile, updateProfile, sendMessage, visitorToken, conversations, currentUser } = useStore();
+  const { profile, updateProfile, sendMessage, visitorToken, conversations, currentUser, simulateOwnerReply } = useStore();
   const [msgModalOpen, setMsgModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   
@@ -37,6 +37,7 @@ const Profile: React.FC = () => {
   
   const [sending, setSending] = useState(false);
   const [sentSuccess, setSentSuccess] = useState(false);
+  const [lastConvId, setLastConvId] = useState<string | null>(null);
 
   // More menu state
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -61,19 +62,26 @@ const Profile: React.FC = () => {
   const handleSendMessage = async () => {
     if (!msgBody.trim()) return;
     setSending(true);
-    await sendMessage(
+    const convId = await sendMessage(
         activeConversation?.id || null, 
         msgBody, 
         'visitor',
         { name: msgName, email: msgEmail }
     );
+    setLastConvId(convId);
     setSending(false);
     setSentSuccess(true);
-    setTimeout(() => {
-        setSentSuccess(false);
-        setMsgModalOpen(false);
-        setMsgBody('');
-    }, 3000);
+  };
+
+  const handleSimulateReply = () => {
+      if (lastConvId) {
+          simulateOwnerReply(lastConvId);
+          setMsgModalOpen(false);
+          setSentSuccess(false);
+          setMsgBody('');
+          // Optional: navigate to messages or show toast
+          alert("Reply simulated! Check your messages tab.");
+      }
   };
 
   const handlePrint = () => {
@@ -226,7 +234,9 @@ const Profile: React.FC = () => {
                 )}
 
                 {activeConversation && (
-                  <span className="text-xs text-green-600 self-center font-medium bg-green-50 px-2 py-1 rounded">Conversation Active</span>
+                  <Link to="/messages" className="text-xs text-green-600 self-center font-medium bg-green-50 px-2 py-1 rounded hover:bg-green-100 transition-colors">
+                    View Conversation
+                  </Link>
                 )}
               </div>
             </div>
@@ -359,7 +369,7 @@ const Profile: React.FC = () => {
       {/* Sidebar Right */}
       <div className="md:col-span-1 space-y-4">
         
-        {/* Relocated Let's Collaborate Section - STYLE MATCHED TO SCREENSHOT - HIDDEN IN PRINT */}
+        {/* Relocated Let's Collaborate Section */}
         <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm relative overflow-hidden print:hidden">
             <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-100/50 rounded-full blur-2xl pointer-events-none"></div>
             
@@ -422,12 +432,12 @@ const Profile: React.FC = () => {
             </div>
         </div>
 
-        {/* AI Assistant Widget - HIDDEN IN PRINT */}
+        {/* AI Assistant Widget */}
         <div className="print:hidden">
             <AIChatWidget />
         </div>
 
-        {/* Ad Placeholder - HIDDEN IN PRINT */}
+        {/* Ad Placeholder */}
         <div className="bg-[#F4F4F4] rounded-lg p-4 text-center print:hidden">
              <p className="text-xs text-gray-500">Promoted</p>
              <div className="mt-2 h-20 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
@@ -450,14 +460,34 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="p-4 overflow-y-auto">
                     {sentSuccess ? (
-                        <div className="text-center py-8 text-green-600">
-                            <div className="text-4xl mb-2">✓</div>
-                            <p className="font-medium text-lg">Message sent!</p>
-                            <p className="text-sm text-gray-500 mt-2">
-                                Your message has been delivered to {profile.name}'s inbox.
-                                <br/>
-                                (Log in as owner to view it)
-                            </p>
+                        <div className="text-center py-6">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 text-green-600 text-2xl">✓</div>
+                            <h3 className="font-bold text-gray-900 mb-1">Message stored locally!</h3>
+                            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-left mb-4 text-xs text-amber-800">
+                                <div className="flex items-center gap-1 font-bold mb-1">
+                                    <AlertTriangle className="w-3 h-3" /> Note on Incognito / Deployment:
+                                </div>
+                                <p>
+                                    This is a static demo app without a backend database. Messages are stored in 
+                                    <b> local browser storage</b>. If you are in Incognito mode or a different browser than the Owner, 
+                                    they will NOT see this message.
+                                </p>
+                            </div>
+                            
+                            <div className="flex flex-col gap-2">
+                                <button 
+                                    onClick={handleSimulateReply}
+                                    className="w-full border border-[#0A66C2] text-[#0A66C2] py-2 rounded-full font-semibold hover:bg-blue-50 text-sm"
+                                >
+                                    Demo: Simulate Owner Reply
+                                </button>
+                                <Link 
+                                    to="/messages" 
+                                    className="w-full bg-[#0A66C2] text-white py-2 rounded-full font-semibold hover:bg-[#004182] text-sm flex items-center justify-center"
+                                >
+                                    Go to My Messages
+                                </Link>
+                            </div>
                         </div>
                     ) : (
                         <>
@@ -529,16 +559,6 @@ const Profile: React.FC = () => {
                               </div>
                           </div>
                       )}
-                      
-                      <div className="flex items-start gap-3">
-                          <LinkIcon className="w-5 h-5 text-gray-600 mt-0.5" />
-                          <div>
-                              <p className="font-semibold text-gray-900 text-sm">Profile Link</p>
-                              <a href={window.location.href} className="text-[#0A66C2] text-sm hover:underline break-all">
-                                  {window.location.href}
-                              </a>
-                          </div>
-                      </div>
 
                       {profile.contact.githubUrl && (
                            <div className="flex items-start gap-3">

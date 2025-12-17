@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useStore } from '../store';
 import { MessageStatus } from '../types';
-import { Search, MoreVertical, Send, ShieldAlert, Archive } from 'lucide-react';
+import { Search, MoreVertical, Send, ShieldAlert, Archive, PlusCircle } from 'lucide-react';
 
 const Messaging: React.FC = () => {
-  const { conversations, currentUser, markAsRead, sendMessage, visitorToken } = useStore();
+  const { conversations, currentUser, markAsRead, sendMessage, visitorToken, createTestConversation } = useStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
 
@@ -44,7 +44,15 @@ const Messaging: React.FC = () => {
         
         {/* Left List */}
         <div className={`border-r border-[#E6E6E6] flex flex-col ${selectedId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-3 border-b border-[#E6E6E6]">
+          <div className="p-3 border-b border-[#E6E6E6] flex flex-col gap-2">
+            {currentUser === 'owner' && (
+                <button 
+                    onClick={createTestConversation}
+                    className="w-full text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded flex items-center justify-center gap-1 border border-gray-200"
+                >
+                    <PlusCircle className="w-3 h-3" /> Demo: Receive Test Message
+                </button>
+            )}
             <div className="relative">
                 <Search className="absolute left-3 top-2 w-4 h-4 text-gray-500" />
                 <input 
@@ -55,6 +63,11 @@ const Messaging: React.FC = () => {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
+            {visibleConversations.length === 0 && (
+                <div className="p-4 text-center text-xs text-gray-400 mt-4">
+                    No active conversations.
+                </div>
+            )}
             {visibleConversations.map(conv => {
                 const lastMsg = conv.messages[conv.messages.length - 1];
                 return (

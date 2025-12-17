@@ -1,13 +1,27 @@
-import React, { useState, useRef } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store';
-import { Save, Plus, Trash, X, Camera, RotateCcw } from 'lucide-react';
-import { Experience } from '../types';
+import { Save, Plus, Trash, X, Camera, RotateCcw, Lock, Database, Check, AlertTriangle } from 'lucide-react';
+import { Experience, Project } from '../types';
 
 const Admin: React.FC = () => {
-  const { profile, updateProfile, currentUser } = useStore();
+  const { profile, updateProfile, currentUser, changePassword, firebaseConfig, setFirebaseConfig, isFirebaseConnected } = useStore();
   const [localProfile, setLocalProfile] = useState(profile);
   const [saved, setSaved] = useState(false);
   const [newSkill, setNewSkill] = useState('');
+  
+  // Password State
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordSaved, setPasswordSaved] = useState(false);
+
+  // Firebase Config State - Initialize from store, but don't auto-sync via useEffect to prevent input locking
+  const [fbConfigInput, setFbConfigInput] = useState(() => {
+      if (firebaseConfig) {
+          return JSON.stringify(firebaseConfig, null, 2);
+      }
+      return '';
+  });
+  const [fbSaved, setFbSaved] = useState(false);
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -20,6 +34,56 @@ const Admin: React.FC = () => {
     updateProfile(localProfile);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handlePasswordUpdate = () => {
+      if (!newPassword.trim()) return;
+      changePassword(newPassword);
+      setNewPassword('');
+      setPasswordSaved(true);
+      setTimeout(() => setPasswordSaved(false), 3000);
+  };
+
+  const handleFirebaseSave = () => {
+      try {
+          let input = fbConfigInput.trim();
+          
+          if (!input) {
+              setFirebaseConfig(null);
+              setFbSaved(true);
+              setTimeout(() => setFbSaved(false), 2000);
+              return;
+          }
+
+          // Smart Parsing: Handle raw JS copy-paste from Firebase Console
+          
+          // 1. Remove comments (// ... and /* ... */)
+          input = input.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+
+          // 2. Remove "const firebaseConfig =" and ";"
+          input = input.replace(/const\s+\w+\s*=\s*/, '').replace(/;$/, '');
+          
+          // 3. Quote keys if they aren't quoted (e.g. apiKey: -> "apiKey":)
+          // This regex finds keys at start of object or after comma/newline
+          input = input.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
+          
+          // 4. Remove trailing commas (JSON doesn't allow them)
+          input = input.replace(/,(\s*})/g, '$1');
+
+          // 5. Try parsing
+          const config = JSON.parse(input);
+
+          if (!config.apiKey || !config.projectId) {
+              throw new Error("Missing required fields (apiKey, projectId)");
+          }
+
+          setFirebaseConfig(config);
+          setFbSaved(true);
+          setTimeout(() => setFbSaved(false), 2000);
+      } catch (e) {
+          console.error(e);
+          alert("Invalid configuration format. Please copy the entire 'const firebaseConfig = { ... }' block directly from the Firebase Console.");
+      }
   };
 
   const handleChange = (field: string, value: any) => {
@@ -49,6 +113,17 @@ const Admin: React.FC = () => {
         employmentType: 'Full-time'
     };
     handleChange('experience', [newExp, ...localProfile.experience]);
+  };
+
+  const handleAddProject = () => {
+    const newProj: Project = {
+      id: Date.now().toString(),
+      name: '',
+      description: '',
+      stack: [],
+      link: ''
+    };
+    handleChange('projects', [newProj, ...localProfile.projects]);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
@@ -105,6 +180,68 @@ const Admin: React.FC = () => {
 
       <div className="space-y-6">
         
+        {/* Real-time DB Connection */}
+        <section className={`bg-white rounded-lg border p-6 shadow-sm space-y-4 ${isFirebaseConnected ? 'border-green-200' : 'border-orange-200'}`}>
+            <div className="flex justify-between items-center border-b pb-2">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <Database className="w-4 h-4" /> 
+                    Real-time Database Connection
+                </h2>
+                {isFirebaseConnected ? (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Connected
+                    </span>
+                ) : (
+                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-bold">Demo Mode</span>
+                )}
+            </div>
+            
+            <div className="text-sm text-gray-600">
+                <p className="mb-2">
+                    Connect <b>Google Firebase</b> to enable real-time messaging across different devices.
+                </p>
+                <div className="bg-gray-50 p-3 rounded text-xs mb-3 border border-gray-200">
+                    <p className="font-semibold mb-1">How to connect:</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                        <li>Go to <a href="https://console.firebase.google.com/" target="_blank" className="text-blue-600 hover:underline">Firebase Console</a> > Project Settings (Gear Icon).</li>
+                        <li>Scroll down to <b>"Your apps"</b>.</li>
+                        <li>Under <b>SDK setup and configuration</b>, select <b>Config</b> (not npm).</li>
+                        <li>Copy the entire code block starting with <code>const firebaseConfig = ...</code>.</li>
+                        <li>Paste it below.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <textarea 
+                className="w-full border font-mono text-xs p-3 h-32 rounded bg-gray-50 focus:ring-1 focus:ring-[#0A66C2] outline-none text-black"
+                placeholder={`const firebaseConfig = {\n  apiKey: "AIzaSy...",\n  authDomain: "...",\n  projectId: "..."\n};`}
+                value={fbConfigInput}
+                onChange={e => setFbConfigInput(e.target.value)}
+            />
+            
+            <div className="flex gap-2">
+                 <button 
+                    onClick={handleFirebaseSave}
+                    className="bg-gray-800 text-white px-4 py-2 rounded font-semibold hover:bg-black transition-colors text-sm"
+                >
+                    {fbSaved ? 'Saved!' : 'Save Connection'}
+                </button>
+                {isFirebaseConnected && (
+                     <button 
+                        onClick={() => { setFirebaseConfig(null); setFbConfigInput(''); }}
+                        className="text-red-600 hover:bg-red-50 px-4 py-2 rounded font-semibold transition-colors text-sm"
+                    >
+                        Disconnect
+                    </button>
+                )}
+            </div>
+            {isFirebaseConnected && (
+                <div className="text-[10px] text-gray-400">
+                    Note: Ensure your Firestore Database rules are set to <b>Test Mode</b> (allow read/write) for this demo to work immediately.
+                </div>
+            )}
+        </section>
+        
         {/* Images */}
         <section className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm">
            <h2 className="text-lg font-semibold border-b pb-2 mb-4">Profile Images</h2>
@@ -141,6 +278,33 @@ const Admin: React.FC = () => {
                <button onClick={() => coverInputRef.current?.click()} className="text-[#0A66C2] text-sm font-semibold mt-2">Change Cover</button>
              </div>
            </div>
+        </section>
+
+        {/* Security / Password */}
+        <section className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm space-y-4">
+             <div className="flex justify-between items-center border-b pb-2">
+                <h2 className="text-lg font-semibold flex items-center gap-2"><Lock className="w-4 h-4" /> Security</h2>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">New Password</label>
+                    <input 
+                        type="password" 
+                        value={newPassword} 
+                        onChange={e => setNewPassword(e.target.value)}
+                        placeholder="Enter new password"
+                        className="w-full border rounded p-2 focus:ring-1 focus:ring-[#0A66C2] outline-none"
+                    />
+                </div>
+                <button 
+                    onClick={handlePasswordUpdate}
+                    disabled={!newPassword.trim()}
+                    className="bg-gray-800 text-white px-4 py-2 rounded font-semibold hover:bg-black disabled:opacity-50 transition-colors"
+                >
+                    Update Password
+                </button>
+             </div>
+             {passwordSaved && <p className="text-xs text-green-600 font-bold">Password updated successfully! Don't forget it.</p>}
         </section>
 
         {/* Basic Info */}
@@ -228,6 +392,90 @@ const Admin: React.FC = () => {
                 Add
               </button>
             </div>
+        </section>
+
+        {/* Projects Editor */}
+        <section className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm space-y-4">
+            <div className="flex justify-between items-center border-b pb-2">
+                <h2 className="text-lg font-semibold">Projects</h2>
+                <button 
+                    onClick={handleAddProject}
+                    className="text-[#0A66C2] text-sm font-medium flex items-center gap-1 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                >
+                    <Plus className="w-3 h-3" /> Add Project
+                </button>
+            </div>
+            {localProfile.projects.map((proj, idx) => (
+                <div key={proj.id} className="border p-4 rounded bg-gray-50 relative group mb-4">
+                     <div className="absolute top-2 right-2 flex gap-2">
+                        <button 
+                            onClick={() => {
+                              const newProjs = localProfile.projects.filter((_, i) => i !== idx);
+                              handleChange('projects', newProjs);
+                            }}
+                            className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded flex items-center gap-1 text-xs"
+                            title="Remove Project"
+                        >
+                            <Trash className="w-3 h-3" /> Remove
+                        </button>
+                     </div>
+                     <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Project Name</label>
+                                <input 
+                                    value={proj.name} 
+                                    className="w-full border p-2 rounded text-sm font-semibold" 
+                                    placeholder="e.g. Portfolio Site" 
+                                    onChange={(e) => {
+                                        const newProjs = [...localProfile.projects];
+                                        newProjs[idx].name = e.target.value;
+                                        handleChange('projects', newProjs);
+                                    }} 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Link URL</label>
+                                <input 
+                                    value={proj.link || ''} 
+                                    className="w-full border p-2 rounded text-sm" 
+                                    placeholder="https://..." 
+                                    onChange={(e) => {
+                                        const newProjs = [...localProfile.projects];
+                                        newProjs[idx].link = e.target.value;
+                                        handleChange('projects', newProjs);
+                                    }} 
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                            <textarea 
+                                className="w-full border p-2 rounded text-sm h-20" 
+                                value={proj.description} 
+                                onChange={(e) => {
+                                    const newProjs = [...localProfile.projects];
+                                    newProjs[idx].description = e.target.value;
+                                    handleChange('projects', newProjs);
+                                }} 
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Tech Stack (comma separated)</label>
+                            <input 
+                                value={proj.stack.join(', ')} 
+                                className="w-full border p-2 rounded text-sm" 
+                                placeholder="React, TypeScript, Tailwind" 
+                                onChange={(e) => {
+                                    const newProjs = [...localProfile.projects];
+                                    newProjs[idx].stack = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                    handleChange('projects', newProjs);
+                                }} 
+                            />
+                        </div>
+                     </div>
+                </div>
+            ))}
         </section>
 
         {/* Experience - simplified editor */}

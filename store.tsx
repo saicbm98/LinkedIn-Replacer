@@ -1,7 +1,9 @@
+
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { ProfileContent, Conversation, Message, MessageStatus } from './types';
-import { INITIAL_PROFILE } from './constants';
+import { ProfileContent, Conversation, Message, MessageStatus, FirebaseConfig } from './types';
+import { INITIAL_PROFILE, ADMIN_PASSWORD } from './constants';
 import { checkSpam } from './services/geminiService';
+import { initFirebase, subscribeToConversations, saveConversationToFirestore, updateConversationInFirestore } from './services/firebaseService';
 
 interface StoreContextType {
   profile: ProfileContent;
@@ -11,13 +13,21 @@ interface StoreContextType {
   markAsRead: (conversationId: string) => void;
   currentUser: 'visitor' | 'owner';
   setCurrentUser: (user: 'visitor' | 'owner') => void;
+  logout: () => void;
   visitorToken: string;
+  verifyPassword: (password: string) => boolean;
+  changePassword: (newPass: string) => void;
+  simulateOwnerReply: (conversationId: string) => void;
+  createTestConversation: () => void;
+  firebaseConfig: FirebaseConfig | null;
+  setFirebaseConfig: (config: FirebaseConfig | null) => void;
+  isFirebaseConnected: boolean;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Lazy initialize state from localStorage to prevent overwriting with defaults on mount
+  // Lazy initialize state from localStorage
   const [profile, setProfile] = useState<ProfileContent>(() => {
     try {
       const stored = localStorage.getItem('lr_profile');
@@ -40,7 +50,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [currentUser, setCurrentUser] = useState<'visitor' | 'owner'>('visitor');
   
-  // Initialize visitorToken from localStorage or create a new one
+  // Password State
+  const [adminPassword, setAdminPassword] = useState(() => {
+    return localStorage.getItem('lr_admin_password') || ADMIN_PASSWORD;
+  });
+
+  // Visitor Token
   const [visitorToken] = useState(() => {
     try {
       const stored = localStorage.getItem('lr_visitor_token');
@@ -53,46 +68,82 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
-  // Ref to track if initial mount has happened to avoid double-saves in StrictMode if needed,
-  // though lazy init solves the main overwrite issue.
+  // Firebase State
+  const [firebaseConfig, setFirebaseConfigState] = useState<FirebaseConfig | null>(() => {
+      try {
+          const stored = localStorage.getItem('lr_firebase_config');
+          return stored ? JSON.parse(stored) : null;
+      } catch (e) { return null; }
+  });
+  const [isFirebaseConnected, setIsFirebaseConnected] = useState(false);
+
   const isMounted = useRef(false);
+
+  // Initialize Firebase if config exists
+  useEffect(() => {
+      if (firebaseConfig) {
+          const success = initFirebase(firebaseConfig);
+          setIsFirebaseConnected(success);
+          
+          if (success) {
+              // Subscribe to real-time updates
+              const unsubscribe = subscribeToConversations((remoteConversations) => {
+                  setConversations(remoteConversations);
+                  // Update local storage as backup/cache
+                  localStorage.setItem('lr_conversations', JSON.stringify(remoteConversations));
+              });
+              return () => unsubscribe();
+          }
+      } else {
+          setIsFirebaseConnected(false);
+      }
+  }, [firebaseConfig]);
 
   useEffect(() => {
     isMounted.current = true;
   }, []);
 
-  // Listen for storage changes (simulating real-time sync between tabs)
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'lr_conversations' && e.newValue) {
-        setConversations(JSON.parse(e.newValue));
-      }
-      if (e.key === 'lr_profile' && e.newValue) {
-        setProfile(JSON.parse(e.newValue));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // Save to local storage on change
+  // Sync profile to local storage (Profile is typically static, not syncing to Firebase in this version for simplicity, 
+  // but in a full app you'd sync this too. For now we assume Owner uses one device to edit profile.)
   useEffect(() => {
     if (isMounted.current) {
       localStorage.setItem('lr_profile', JSON.stringify(profile));
     }
   }, [profile]);
 
+  // Sync conversations to local storage (as backup or for Demo mode)
   useEffect(() => {
-    if (isMounted.current) {
+    if (isMounted.current && !isFirebaseConnected) {
       localStorage.setItem('lr_conversations', JSON.stringify(conversations));
     }
-  }, [conversations]);
+  }, [conversations, isFirebaseConnected]);
+
+  const setFirebaseConfig = (config: FirebaseConfig | null) => {
+      setFirebaseConfigState(config);
+      if (config) {
+          localStorage.setItem('lr_firebase_config', JSON.stringify(config));
+      } else {
+          localStorage.removeItem('lr_firebase_config');
+          setIsFirebaseConnected(false);
+      }
+  };
 
   const updateProfile = (newProfile: ProfileContent) => {
     setProfile(newProfile);
-    // Force immediate save for critical updates like images
     localStorage.setItem('lr_profile', JSON.stringify(newProfile));
+  };
+
+  const logout = () => {
+    setCurrentUser('visitor');
+  };
+
+  const verifyPassword = (input: string) => {
+      return input === adminPassword;
+  };
+
+  const changePassword = (newPass: string) => {
+      setAdminPassword(newPass);
+      localStorage.setItem('lr_admin_password', newPass);
   };
 
   const sendMessage = async (
@@ -121,7 +172,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     let targetConversationId = conversationId;
-    let updatedConversations = [...conversations];
+    let newConversationObj: Conversation | null = null;
+    let updatedConversationObj: Conversation | null = null;
 
     if (!targetConversationId) {
       // Create new conversation
@@ -132,7 +184,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const emailSuffix = visitorDetails?.email ? ` (${visitorDetails.email})` : '';
       const displayName = sender === 'visitor' ? (visitorName + emailSuffix) : 'Unknown';
 
-      const newConversation: Conversation = {
+      // Added createdAt property to satisfy Conversation interface requirements
+      newConversationObj = {
         id: targetConversationId,
         visitorName: displayName,
         visitorToken: visitorToken,
@@ -140,39 +193,106 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updatedAt: Date.now(),
         unreadCount: 1,
         status: flags.includes('spam') ? MessageStatus.SPAM : MessageStatus.UNREAD,
-        messages: [newMessage]
+        messages: [newMessage],
+        createdAt: Date.now()
       };
-      
-      updatedConversations = [newConversation, ...updatedConversations];
+    }
+
+    // Logic for updating state depending on mode
+    if (isFirebaseConnected) {
+         if (newConversationObj) {
+             await saveConversationToFirestore(newConversationObj);
+         } else {
+             // Find existing to update
+             const existing = conversations.find(c => c.id === targetConversationId);
+             if (existing) {
+                 updatedConversationObj = {
+                    ...existing,
+                    lastMessageSnippet: body.substring(0, 30) + '...',
+                    updatedAt: Date.now(),
+                    unreadCount: sender === 'visitor' ? existing.unreadCount + 1 : existing.unreadCount,
+                    messages: [...existing.messages, newMessage]
+                 };
+                 await updateConversationInFirestore(updatedConversationObj);
+             }
+         }
     } else {
-      // Update existing
-      updatedConversations = updatedConversations.map(c => {
-        if (c.id === targetConversationId) {
-          return {
-            ...c,
-            lastMessageSnippet: body.substring(0, 30) + '...',
-            updatedAt: Date.now(),
-            unreadCount: sender === 'visitor' ? c.unreadCount + 1 : c.unreadCount,
-            messages: [...c.messages, newMessage]
-          };
+        // Local Storage Mode
+        let updatedConversations = [...conversations];
+        if (newConversationObj) {
+            updatedConversations = [newConversationObj, ...updatedConversations];
+        } else {
+             updatedConversations = updatedConversations.map(c => {
+                if (c.id === targetConversationId) {
+                  return {
+                    ...c,
+                    lastMessageSnippet: body.substring(0, 30) + '...',
+                    updatedAt: Date.now(),
+                    unreadCount: sender === 'visitor' ? c.unreadCount + 1 : c.unreadCount,
+                    messages: [...c.messages, newMessage]
+                  };
+                }
+                return c;
+              });
         }
-        return c;
-      });
+        setConversations(updatedConversations);
     }
     
-    setConversations(updatedConversations);
-    localStorage.setItem('lr_conversations', JSON.stringify(updatedConversations));
-    return targetConversationId;
+    return targetConversationId as string;
   };
 
   const markAsRead = (conversationId: string) => {
-    setConversations(prev => {
-        const updated = prev.map(c => 
-            c.id === conversationId ? { ...c, unreadCount: 0, status: MessageStatus.READ } : c
-        );
-        localStorage.setItem('lr_conversations', JSON.stringify(updated));
-        return updated;
-    });
+    if (isFirebaseConnected) {
+        const c = conversations.find(c => c.id === conversationId);
+        if (c && c.unreadCount > 0) {
+            updateConversationInFirestore({ ...c, unreadCount: 0, status: MessageStatus.READ });
+        }
+    } else {
+        setConversations(prev => {
+            const updated = prev.map(c => 
+                c.id === conversationId ? { ...c, unreadCount: 0, status: MessageStatus.READ } : c
+            );
+            return updated;
+        });
+    }
+  };
+
+  // --- Demo Simulation Functions ---
+  const simulateOwnerReply = (conversationId: string) => {
+    setTimeout(() => {
+        sendMessage(conversationId, "Thanks for reaching out! I'll get back to you shortly. (This is an automated demo reply)", 'owner');
+    }, 1500);
+  };
+
+  const createTestConversation = () => {
+    const testId = Date.now().toString();
+    const testMessage: Message = {
+        id: Date.now().toString(),
+        conversationId: testId,
+        senderType: 'visitor',
+        body: "Hi! I'm a recruiter from TechCorp. Are you open to new roles?",
+        createdAt: Date.now()
+    };
+    
+    // Added createdAt property to satisfy Conversation interface requirements
+    const testConv: Conversation = {
+        id: testId,
+        visitorName: "Recruiter (Demo)",
+        visitorToken: 'demo-token',
+        lastMessageSnippet: "Hi! I'm a recruiter from Tech...",
+        updatedAt: Date.now(),
+        unreadCount: 1,
+        status: MessageStatus.UNREAD,
+        messages: [testMessage],
+        createdAt: Date.now()
+    };
+    
+    if (isFirebaseConnected) {
+        saveConversationToFirestore(testConv);
+    } else {
+        const updated = [testConv, ...conversations];
+        setConversations(updated);
+    }
   };
 
   return (
@@ -184,7 +304,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       markAsRead,
       currentUser,
       setCurrentUser,
-      visitorToken
+      logout,
+      visitorToken,
+      verifyPassword,
+      changePassword,
+      simulateOwnerReply,
+      createTestConversation,
+      firebaseConfig,
+      setFirebaseConfig,
+      isFirebaseConnected
     }}>
       {children}
     </StoreContext.Provider>
