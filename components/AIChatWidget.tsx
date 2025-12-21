@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useStore } from '../store';
-import { answerProfileQuestion } from '../services/geminiService';
+import { useStore } from '../store.tsx';
+import { answerProfileQuestion } from '../services/geminiService.ts';
 import { Sparkles, MessageSquare } from 'lucide-react';
 
 const AIChatWidget: React.FC = () => {

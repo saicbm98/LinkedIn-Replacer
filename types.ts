@@ -1,5 +1,4 @@
 
-
 export interface Experience {
   id: string;
   company: string;
@@ -38,6 +37,8 @@ export interface ProfileContent {
   projects: Project[];
   skills: string[];
   whatLookingFor: string[];
+  collaborateSubtitle: string;
+  collaborateBullets: string[];
   contact: {
     email: string;
     githubUrl: string;
@@ -72,7 +73,6 @@ export interface Conversation {
   unreadCount: number;
   status: MessageStatus;
   messages: Message[];
-  // Added createdAt property to satisfy type requirements in firebaseService.ts
   createdAt: number;
 }
 

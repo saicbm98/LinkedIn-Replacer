@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Users, MessageSquare, User, Search, LogOut } from 'lucide-react';
-import { useStore } from '../store';
-import LoginModal from './LoginModal';
+import { useStore } from '../store.tsx';
+import LoginModal from './LoginModal.tsx';
 
 const Header: React.FC = () => {
   const { currentUser, logout, conversations, visitorToken } = useStore();

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { evaluateSOC } from '../services/geminiService';
-import { SOCResult } from '../types';
+import { evaluateSOC } from '../services/geminiService.ts';
+import { SOCResult } from '../types.ts';
 import { Brain, CheckCircle, AlertCircle } from 'lucide-react';
 
 const SOCEvaluator: React.FC = () => {

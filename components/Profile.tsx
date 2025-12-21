@@ -1,8 +1,9 @@
+import { CustomCrispChat } from './CustomCrispChat';
 import React, { useState, useRef, useEffect } from 'react';
-import { useStore } from '../store';
+import { useStore } from '../store.tsx';
 import { Link } from 'react-router-dom';
 import { MapPin, Link as LinkIcon, Send, Plus, Camera, Pencil, Briefcase, ChevronDown, Printer, Github, Mail, Zap, Bot, Rocket, ArrowRight, X, AlertTriangle } from 'lucide-react';
-import AIChatWidget from './AIChatWidget';
+import AIChatWidget from './AIChatWidget.tsx';
 
 const LogoImage = ({ logoUrl, name }: { logoUrl?: string, name: string }) => {
   const [error, setError] = useState(false);
@@ -369,30 +370,35 @@ const Profile: React.FC = () => {
       {/* Sidebar Right */}
       <div className="md:col-span-1 space-y-4">
         
-        {/* Relocated Let's Collaborate Section */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm relative overflow-hidden print:hidden">
+        {/* Let's Collaborate Section */}
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm relative overflow-hidden print:hidden group">
             <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-100/50 rounded-full blur-2xl pointer-events-none"></div>
             
-            <h2 className="text-lg font-bold text-[#1A1A1A] mb-3 relative z-10 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-amber-500" /> Let's Collaborate
-            </h2>
+            <div className="flex justify-between items-start mb-3 relative z-10">
+                <h2 className="text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-amber-500" /> Let's Collaborate
+                </h2>
+                {currentUser === 'owner' && (
+                  <Link to="/admin" className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition-opacity">
+                    <Pencil className="w-4 h-4 text-gray-500" />
+                  </Link>
+                )}
+            </div>
+
             <p className="text-sm text-gray-900 mb-3 font-semibold relative z-10 leading-relaxed">
-                Are you a founder hiring manager or recruiter looking for someone who
+                {profile.collaborateSubtitle}
             </p>
             
             <ul className="space-y-2 relative z-10 mb-4">
-                <li className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 mt-1.5"></div>
-                    <p className="text-sm text-gray-700">Is obsessed with improving how things work and learns fast from setbacks</p>
-                </li>
-                <li className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0 mt-1.5"></div>
-                    <p className="text-sm text-gray-700">Uses AI and no code tools to make operations faster and more efficient</p>
-                </li>
-                 <li className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0 mt-1.5"></div>
-                    <p className="text-sm text-gray-700">Brings whatever it takes to help you hit mission critical goals</p>
-                </li>
+                {profile.collaborateBullets.map((bullet, idx) => {
+                    const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500'];
+                    return (
+                        <li key={idx} className="flex items-start gap-3">
+                            <div className={`w-1.5 h-1.5 rounded-full ${colors[idx % colors.length]} shrink-0 mt-1.5`}></div>
+                            <p className="text-sm text-gray-700">{bullet}</p>
+                        </li>
+                    );
+                })}
             </ul>
 
             <p className="text-sm text-gray-900 font-medium mb-2 relative z-10">
@@ -450,92 +456,12 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* Message Modal */}
-      {msgModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-[100] flex items-end md:items-center justify-center p-4 animate-fade-in print:hidden">
-            <div className="bg-white w-full max-w-lg rounded-t-xl md:rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
-                <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-[#F3F2EF] rounded-t-xl">
-                    <h3 className="font-semibold text-gray-800">New Message to {profile.name}</h3>
-                    <button onClick={() => setMsgModalOpen(false)} className="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
-                </div>
-                <div className="p-4 overflow-y-auto">
-                    {sentSuccess ? (
-                        <div className="text-center py-6">
-                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 text-green-600 text-2xl">✓</div>
-                            <h3 className="font-bold text-gray-900 mb-1">Message stored locally!</h3>
-                            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-left mb-4 text-xs text-amber-800">
-                                <div className="flex items-center gap-1 font-bold mb-1">
-                                    <AlertTriangle className="w-3 h-3" /> Note on Incognito / Deployment:
-                                </div>
-                                <p>
-                                    This is a static demo app without a backend database. Messages are stored in 
-                                    <b> local browser storage</b>. If you are in Incognito mode or a different browser than the Owner, 
-                                    they will NOT see this message.
-                                </p>
-                            </div>
-                            
-                            <div className="flex flex-col gap-2">
-                                <button 
-                                    onClick={handleSimulateReply}
-                                    className="w-full border border-[#0A66C2] text-[#0A66C2] py-2 rounded-full font-semibold hover:bg-blue-50 text-sm"
-                                >
-                                    Demo: Simulate Owner Reply
-                                </button>
-                                <Link 
-                                    to="/messages" 
-                                    className="w-full bg-[#0A66C2] text-white py-2 rounded-full font-semibold hover:bg-[#004182] text-sm flex items-center justify-center"
-                                >
-                                    Go to My Messages
-                                </Link>
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                             <div className="mb-4 bg-blue-50 p-3 rounded text-xs text-blue-800">
-                                This message will be sent to <b>{profile.name}</b>'s inbox. Replies will appear here when you return using this browser.
-                            </div>
-                            
-                            {/* Visitor Details Inputs */}
-                            {!activeConversation && (
-                                <div className="grid grid-cols-2 gap-3 mb-3">
-                                    <input 
-                                        className="border border-gray-300 rounded-md p-2 text-sm focus:ring-1 focus:ring-[#0A66C2] outline-none"
-                                        placeholder="Your Name (Optional)"
-                                        value={msgName}
-                                        onChange={(e) => setMsgName(e.target.value)}
-                                    />
-                                    <input 
-                                        className="border border-gray-300 rounded-md p-2 text-sm focus:ring-1 focus:ring-[#0A66C2] outline-none"
-                                        placeholder="Your Email (Optional)"
-                                        value={msgEmail}
-                                        onChange={(e) => setMsgEmail(e.target.value)}
-                                    />
-                                </div>
-                            )}
-
-                            <textarea 
-                                className="w-full border border-gray-300 rounded-md p-3 h-40 focus:ring-2 focus:ring-[#0A66C2] focus:border-transparent outline-none resize-none"
-                                placeholder="Hi Alex, I came across your profile and..."
-                                value={msgBody}
-                                onChange={(e) => setMsgBody(e.target.value)}
-                            />
-                        </>
-                    )}
-                </div>
-                {!sentSuccess && (
-                     <div className="p-4 border-t border-gray-200 flex justify-end">
-                        <button 
-                            onClick={handleSendMessage}
-                            disabled={sending || !msgBody.trim()}
-                            className="bg-[#0A66C2] text-white px-6 py-1.5 rounded-full font-semibold hover:bg-[#004182] disabled:opacity-50 transition-colors"
-                        >
-                            {sending ? 'Sending...' : 'Send'}
-                        </button>
-                    </div>
-                )}
-            </div>
-        </div>
-      )}
+      {/* Crisp Pre-Chat Modal */}
+      <CustomCrispChat 
+        isOpen={msgModalOpen}
+        onClose={() => setMsgModalOpen(false)}
+        profileName={profile.name}
+      />
 
       {/* Contact Info Modal */}
       {contactModalOpen && (

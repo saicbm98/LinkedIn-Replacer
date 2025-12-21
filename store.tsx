@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { ProfileContent, Conversation, Message, MessageStatus, FirebaseConfig } from './types';
-import { INITIAL_PROFILE, ADMIN_PASSWORD } from './constants';
-import { checkSpam } from './services/geminiService';
-import { initFirebase, subscribeToConversations, saveConversationToFirestore, updateConversationInFirestore } from './services/firebaseService';
+import { ProfileContent, Conversation, Message, MessageStatus, FirebaseConfig } from './types.ts';
+import { INITIAL_PROFILE, ADMIN_PASSWORD } from './constants.ts';
+import { checkSpam } from './services/geminiService.ts';
+import { initFirebase, subscribeToConversations, saveConversationToFirestore, updateConversationInFirestore } from './services/firebaseService.ts';
 
 interface StoreContextType {
   profile: ProfileContent;
@@ -22,18 +21,21 @@ interface StoreContextType {
   firebaseConfig: FirebaseConfig | null;
   setFirebaseConfig: (config: FirebaseConfig | null) => void;
   isFirebaseConnected: boolean;
+  
+  // Crisp Integration
+  crispMessages: Message[];
+  isCrispTyping: boolean;
+  sendCrispMessage: (text: string) => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Lazy initialize state from localStorage
   const [profile, setProfile] = useState<ProfileContent>(() => {
     try {
       const stored = localStorage.getItem('lr_profile');
       return stored ? JSON.parse(stored) : INITIAL_PROFILE;
     } catch (e) {
-      console.error("Failed to load profile from storage", e);
       return INITIAL_PROFILE;
     }
   });
@@ -43,32 +45,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const stored = localStorage.getItem('lr_conversations');
       return stored ? JSON.parse(stored) : [];
     } catch (e) {
-      console.error("Failed to load conversations from storage", e);
       return [];
     }
   });
 
-  const [currentUser, setCurrentUser] = useState<'visitor' | 'owner'>('visitor');
-  
-  // Password State
-  const [adminPassword, setAdminPassword] = useState(() => {
-    return localStorage.getItem('lr_admin_password') || ADMIN_PASSWORD;
-  });
-
-  // Visitor Token
-  const [visitorToken] = useState(() => {
+  // Crisp specific state
+  const [crispMessages, setCrispMessages] = useState<Message[]>(() => {
     try {
-      const stored = localStorage.getItem('lr_visitor_token');
-      if (stored) return stored;
-      const newToken = 'visitor-' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('lr_visitor_token', newToken);
-      return newToken;
+      const stored = localStorage.getItem('lr_crisp_history');
+      return stored ? JSON.parse(stored) : [];
     } catch (e) {
-      return 'visitor-fallback-' + Date.now();
+      return [];
     }
   });
+  const [isCrispTyping, setIsCrispTyping] = useState(false);
 
-  // Firebase State
+  const [currentUser, setCurrentUser] = useState<'visitor' | 'owner'>('visitor');
+  const [adminPassword, setAdminPassword] = useState(() => localStorage.getItem('lr_admin_password') || ADMIN_PASSWORD);
+  
+  const [visitorToken] = useState(() => {
+    const stored = localStorage.getItem('lr_visitor_token');
+    if (stored) return stored;
+    const newToken = 'visitor-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('lr_visitor_token', newToken);
+    return newToken;
+  });
+
   const [firebaseConfig, setFirebaseConfigState] = useState<FirebaseConfig | null>(() => {
       try {
           const stored = localStorage.getItem('lr_firebase_config');
@@ -79,44 +81,75 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const isMounted = useRef(false);
 
-  // Initialize Firebase if config exists
+  // Initialize Firebase
   useEffect(() => {
       if (firebaseConfig) {
           const success = initFirebase(firebaseConfig);
           setIsFirebaseConnected(success);
-          
           if (success) {
-              // Subscribe to real-time updates
               const unsubscribe = subscribeToConversations((remoteConversations) => {
                   setConversations(remoteConversations);
-                  // Update local storage as backup/cache
-                  localStorage.setItem('lr_conversations', JSON.stringify(remoteConversations));
               });
               return () => unsubscribe();
           }
-      } else {
-          setIsFirebaseConnected(false);
       }
   }, [firebaseConfig]);
 
-  useEffect(() => {
-    isMounted.current = true;
-  }, []);
-
-  // Sync profile to local storage (Profile is typically static, not syncing to Firebase in this version for simplicity, 
-  // but in a full app you'd sync this too. For now we assume Owner uses one device to edit profile.)
+  // Persistence
   useEffect(() => {
     if (isMounted.current) {
       localStorage.setItem('lr_profile', JSON.stringify(profile));
+      localStorage.setItem('lr_crisp_history', JSON.stringify(crispMessages));
+      if (!isFirebaseConnected) {
+        localStorage.setItem('lr_conversations', JSON.stringify(conversations));
+      }
+    } else {
+      isMounted.current = true;
     }
-  }, [profile]);
+  }, [profile, conversations, isFirebaseConnected, crispMessages]);
 
-  // Sync conversations to local storage (as backup or for Demo mode)
+  // Crisp Listeners
   useEffect(() => {
-    if (isMounted.current && !isFirebaseConnected) {
-      localStorage.setItem('lr_conversations', JSON.stringify(conversations));
+    if (typeof window !== 'undefined' && (window as any).$crisp) {
+      const handleMessageReceived = (message: any) => {
+        const newMsg: Message = {
+          id: message.fingerprint || Date.now().toString(),
+          conversationId: 'crisp-live',
+          senderType: 'owner', // In the eyes of the visitor, incoming Crisp is from owner
+          body: message.content,
+          createdAt: Date.now()
+        };
+        setCrispMessages(prev => [...prev, newMsg]);
+        setIsCrispTyping(false);
+      };
+
+      const handleMessageSent = (message: any) => {
+        const newMsg: Message = {
+          id: message.fingerprint || Date.now().toString(),
+          conversationId: 'crisp-live',
+          senderType: 'visitor',
+          body: message.content,
+          createdAt: Date.now()
+        };
+        setCrispMessages(prev => [...prev, newMsg]);
+      };
+
+      const handleTyping = (state: string) => {
+        setIsCrispTyping(true);
+        setTimeout(() => setIsCrispTyping(false), 5000);
+      };
+
+      (window as any).$crisp.push(['on', 'message:received', handleMessageReceived]);
+      (window as any).$crisp.push(['on', 'message:sent', handleMessageSent]);
+      (window as any).$crisp.push(['on', 'chat:typing:received', handleTyping]);
     }
-  }, [conversations, isFirebaseConnected]);
+  }, []);
+
+  const sendCrispMessage = (text: string) => {
+    if ((window as any).$crisp) {
+      (window as any).$crisp.push(['do', 'message:send', ['text', text]]);
+    }
+  };
 
   const setFirebaseConfig = (config: FirebaseConfig | null) => {
       setFirebaseConfigState(config);
@@ -125,21 +158,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       } else {
           localStorage.removeItem('lr_firebase_config');
           setIsFirebaseConnected(false);
+          const stored = localStorage.getItem('lr_conversations');
+          setConversations(stored ? JSON.parse(stored) : []);
       }
   };
 
   const updateProfile = (newProfile: ProfileContent) => {
     setProfile(newProfile);
-    localStorage.setItem('lr_profile', JSON.stringify(newProfile));
   };
 
   const logout = () => {
     setCurrentUser('visitor');
   };
 
-  const verifyPassword = (input: string) => {
-      return input === adminPassword;
-  };
+  const verifyPassword = (input: string) => input === adminPassword;
 
   const changePassword = (newPass: string) => {
       setAdminPassword(newPass);
@@ -152,167 +184,123 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     sender: 'visitor' | 'owner',
     visitorDetails?: { name?: string; email?: string }
   ): Promise<string> => {
-    // 1. Spam check for visitors
     let flags: string[] = [];
     if (sender === 'visitor') {
       const spamCheck = await checkSpam(body);
-      if (spamCheck.isSpam) {
-        flags.push('spam');
-        if (spamCheck.reason) console.warn('Spam detected:', spamCheck.reason);
-      }
+      if (spamCheck.isSpam) flags.push('spam');
     }
 
+    const now = Date.now();
+    const newMessageId = `${now}-${Math.random().toString(36).substr(2, 5)}`;
+    
+    let existingConv = conversationId 
+        ? conversations.find(c => c.id === conversationId)
+        : conversations.find(c => c.visitorToken === visitorToken);
+
+    const targetId = existingConv ? existingConv.id : now.toString();
+
     const newMessage: Message = {
-      id: Date.now().toString(),
-      conversationId: conversationId || '',
+      id: newMessageId,
+      conversationId: targetId,
       senderType: sender,
       body,
-      createdAt: Date.now(),
+      createdAt: now,
       flags
     };
 
-    let targetConversationId = conversationId;
-    let newConversationObj: Conversation | null = null;
-    let updatedConversationObj: Conversation | null = null;
+    let updatedConv: Conversation;
 
-    if (!targetConversationId) {
-      // Create new conversation
-      targetConversationId = Date.now().toString();
-      newMessage.conversationId = targetConversationId;
-      
-      const visitorName = visitorDetails?.name || 'Visitor';
-      const emailSuffix = visitorDetails?.email ? ` (${visitorDetails.email})` : '';
-      const displayName = sender === 'visitor' ? (visitorName + emailSuffix) : 'Unknown';
+    if (!existingConv) {
+        const visitorName = visitorDetails?.name || 'Visitor';
+        const emailSuffix = visitorDetails?.email ? ` (${visitorDetails.email})` : '';
+        const displayName = sender === 'visitor' ? (visitorName + emailSuffix) : 'New Connection';
 
-      // Added createdAt property to satisfy Conversation interface requirements
-      newConversationObj = {
-        id: targetConversationId,
-        visitorName: displayName,
-        visitorToken: visitorToken,
-        lastMessageSnippet: body.substring(0, 30) + '...',
-        updatedAt: Date.now(),
-        unreadCount: 1,
-        status: flags.includes('spam') ? MessageStatus.SPAM : MessageStatus.UNREAD,
-        messages: [newMessage],
-        createdAt: Date.now()
-      };
+        updatedConv = {
+            id: targetId,
+            visitorName: displayName,
+            visitorToken: visitorToken,
+            lastMessageSnippet: body.substring(0, 40),
+            updatedAt: now,
+            unreadCount: sender === 'visitor' ? 1 : 0,
+            status: flags.includes('spam') ? MessageStatus.SPAM : MessageStatus.UNREAD,
+            messages: [newMessage],
+            createdAt: now
+        };
+    } else {
+        updatedConv = {
+            ...existingConv,
+            lastMessageSnippet: body.substring(0, 40),
+            updatedAt: now,
+            unreadCount: sender === 'visitor' ? existingConv.unreadCount + 1 : 0,
+            messages: [...existingConv.messages, newMessage],
+            status: sender === 'owner' ? MessageStatus.READ : existingConv.status
+        };
     }
 
-    // Logic for updating state depending on mode
     if (isFirebaseConnected) {
-         if (newConversationObj) {
-             await saveConversationToFirestore(newConversationObj);
-         } else {
-             // Find existing to update
-             const existing = conversations.find(c => c.id === targetConversationId);
-             if (existing) {
-                 updatedConversationObj = {
-                    ...existing,
-                    lastMessageSnippet: body.substring(0, 30) + '...',
-                    updatedAt: Date.now(),
-                    unreadCount: sender === 'visitor' ? existing.unreadCount + 1 : existing.unreadCount,
-                    messages: [...existing.messages, newMessage]
-                 };
-                 await updateConversationInFirestore(updatedConversationObj);
-             }
-         }
+        await saveConversationToFirestore(updatedConv);
     } else {
-        // Local Storage Mode
-        let updatedConversations = [...conversations];
-        if (newConversationObj) {
-            updatedConversations = [newConversationObj, ...updatedConversations];
-        } else {
-             updatedConversations = updatedConversations.map(c => {
-                if (c.id === targetConversationId) {
-                  return {
-                    ...c,
-                    lastMessageSnippet: body.substring(0, 30) + '...',
-                    updatedAt: Date.now(),
-                    unreadCount: sender === 'visitor' ? c.unreadCount + 1 : c.unreadCount,
-                    messages: [...c.messages, newMessage]
-                  };
-                }
-                return c;
-              });
-        }
-        setConversations(updatedConversations);
+        setConversations(prev => {
+            const others = prev.filter(c => c.id !== targetId);
+            return [updatedConv, ...others];
+        });
     }
     
-    return targetConversationId as string;
+    return targetId;
   };
 
   const markAsRead = (conversationId: string) => {
-    if (isFirebaseConnected) {
-        const c = conversations.find(c => c.id === conversationId);
-        if (c && c.unreadCount > 0) {
-            updateConversationInFirestore({ ...c, unreadCount: 0, status: MessageStatus.READ });
+    const c = conversations.find(c => c.id === conversationId);
+    if (c && c.unreadCount > 0) {
+        const updated = { ...c, unreadCount: 0, status: MessageStatus.READ };
+        if (isFirebaseConnected) {
+            updateConversationInFirestore(updated);
+        } else {
+            setConversations(prev => prev.map(conv => conv.id === conversationId ? updated : conv));
         }
-    } else {
-        setConversations(prev => {
-            const updated = prev.map(c => 
-                c.id === conversationId ? { ...c, unreadCount: 0, status: MessageStatus.READ } : c
-            );
-            return updated;
-        });
     }
   };
 
-  // --- Demo Simulation Functions ---
   const simulateOwnerReply = (conversationId: string) => {
     setTimeout(() => {
-        sendMessage(conversationId, "Thanks for reaching out! I'll get back to you shortly. (This is an automated demo reply)", 'owner');
+        sendMessage(conversationId, "Thanks for getting in touch! I've received your message and will check it out shortly.", 'owner');
     }, 1500);
   };
 
   const createTestConversation = () => {
-    const testId = Date.now().toString();
-    const testMessage: Message = {
-        id: Date.now().toString(),
-        conversationId: testId,
-        senderType: 'visitor',
-        body: "Hi! I'm a recruiter from TechCorp. Are you open to new roles?",
-        createdAt: Date.now()
-    };
-    
-    // Added createdAt property to satisfy Conversation interface requirements
+    const testId = `demo-${Date.now()}`;
     const testConv: Conversation = {
         id: testId,
-        visitorName: "Recruiter (Demo)",
-        visitorToken: 'demo-token',
-        lastMessageSnippet: "Hi! I'm a recruiter from Tech...",
+        visitorName: "Potential Lead (Demo)",
+        visitorToken: `demo-token-${Math.random()}`,
+        lastMessageSnippet: "I saw your portfolio on GitHub...",
         updatedAt: Date.now(),
         unreadCount: 1,
         status: MessageStatus.UNREAD,
-        messages: [testMessage],
+        messages: [{
+            id: 'm-test',
+            conversationId: testId,
+            senderType: 'visitor',
+            body: "Hi! I really like your work on operations automation. Are you currently available for new projects?",
+            createdAt: Date.now()
+        }],
         createdAt: Date.now()
     };
     
     if (isFirebaseConnected) {
         saveConversationToFirestore(testConv);
     } else {
-        const updated = [testConv, ...conversations];
-        setConversations(updated);
+        setConversations(prev => [testConv, ...prev]);
     }
   };
 
   return (
     <StoreContext.Provider value={{
-      profile,
-      updateProfile,
-      conversations,
-      sendMessage,
-      markAsRead,
-      currentUser,
-      setCurrentUser,
-      logout,
-      visitorToken,
-      verifyPassword,
-      changePassword,
-      simulateOwnerReply,
-      createTestConversation,
-      firebaseConfig,
-      setFirebaseConfig,
-      isFirebaseConnected
+      profile, updateProfile, conversations, sendMessage, markAsRead,
+      currentUser, setCurrentUser, logout, visitorToken, verifyPassword,
+      changePassword, simulateOwnerReply, createTestConversation,
+      firebaseConfig, setFirebaseConfig, isFirebaseConnected,
+      crispMessages, isCrispTyping, sendCrispMessage
     }}>
       {children}
     </StoreContext.Provider>

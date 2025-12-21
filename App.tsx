@@ -1,10 +1,11 @@
+import { CrispChat } from './components/CrispChat.tsx';
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { StoreProvider } from './store';
-import Header from './components/Header';
-import Profile from './components/Profile';
-import Messaging from './components/Messaging';
-import Admin from './components/Admin';
+import { StoreProvider } from './store.tsx';
+import Header from './components/Header.tsx';
+import Profile from './components/Profile.tsx';
+import Messaging from './components/Messaging.tsx';
+import Admin from './components/Admin.tsx';
 
 const App: React.FC = () => {
   return (
@@ -21,6 +22,7 @@ const App: React.FC = () => {
           </main>
         </div>
       </Router>
+      <CrispChat />
     </StoreProvider>
   );
 };

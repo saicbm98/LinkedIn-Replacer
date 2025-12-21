@@ -1,3 +1,4 @@
+
 import { ProfileContent } from './types';
 
 export const ADMIN_PASSWORD = "admin123";
@@ -125,6 +126,12 @@ export const INITIAL_PROFILE: ProfileContent = {
   ],
   whatLookingFor: [
     "Immediate entry to mid-level Business Ops, Product Ops, or General Ops roles."
+  ],
+  collaborateSubtitle: "Are you a founder hiring manager or recruiter looking for someone who",
+  collaborateBullets: [
+    "Is obsessed with improving how things work and learns fast from setbacks",
+    "Uses AI and no code tools to make operations faster and more efficient",
+    "Brings whatever it takes to help you hit mission critical goals"
   ],
   contact: {
     email: "medicherlasaicharan@gmail.com",

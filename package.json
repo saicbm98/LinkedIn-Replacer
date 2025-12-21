@@ -11,10 +11,10 @@
   "dependencies": {
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.22.0",
+    "react-router-dom": "6.22.3",
     "@google/genai": "1.33.0",
-    "lucide-react": "0.263.1",
-    "firebase": "^12.7.0"
+    "lucide-react": "0.460.0",
+    "firebase": "10.12.2"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
