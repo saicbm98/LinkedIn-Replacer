@@ -1,5 +1,5 @@
-
-import { initializeApp, getApps } from 'firebase/app';
+// Fix: Corrected Firebase modular imports to resolve "no exported member" errors
+import { initializeApp, getApps } from "firebase/app";
 import { 
   getFirestore, 
   collection, 
@@ -16,6 +16,7 @@ import type { FirebaseConfig, Conversation } from '../types';
 let db: any = null;
 let app: any = null;
 
+// Fix: Initializing Firebase with modular SDK and checking for existing apps
 export function initFirebase(config: FirebaseConfig): boolean {
   try {
     const existingApps = getApps();
@@ -32,6 +33,7 @@ export function initFirebase(config: FirebaseConfig): boolean {
   }
 }
 
+// Fix: Real-time subscription to the conversations collection
 export function subscribeToConversations(
   onUpdate: (conversations: Conversation[]) => void
 ): () => void {
@@ -60,6 +62,7 @@ export function subscribeToConversations(
   });
 }
 
+// Fix: Helper function to save a conversation to Firestore
 export async function saveConversationToFirestore(conversation: Conversation) {
   if (!db) return;
   try {
@@ -75,6 +78,7 @@ export async function saveConversationToFirestore(conversation: Conversation) {
   }
 }
 
+// Fix: Helper function to update an existing conversation in Firestore
 export async function updateConversationInFirestore(conversation: Conversation) {
   if (!db) return;
   try {
@@ -88,6 +92,7 @@ export async function updateConversationInFirestore(conversation: Conversation) 
   }
 }
 
+// Fix: Checks if the Firestore database instance is initialized
 export function isFirebaseInitialized(): boolean {
   return db !== null;
 }

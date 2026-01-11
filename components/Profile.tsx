@@ -1,4 +1,4 @@
-import { CustomCrispChat } from './CustomCrispChat';
+import { CustomCrispChat } from './CustomCrispChat.tsx';
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store.tsx';
 import { Link } from 'react-router-dom';
@@ -74,20 +74,8 @@ const Profile: React.FC = () => {
     setSentSuccess(true);
   };
 
-  const handleSimulateReply = () => {
-      if (lastConvId) {
-          simulateOwnerReply(lastConvId);
-          setMsgModalOpen(false);
-          setSentSuccess(false);
-          setMsgBody('');
-          // Optional: navigate to messages or show toast
-          alert("Reply simulated! Check your messages tab.");
-      }
-  };
-
   const handlePrint = () => {
     setMoreMenuOpen(false);
-    // Timeout ensures the menu closes visually before the browser opens the print dialog
     setTimeout(() => {
         window.print();
     }, 100);
@@ -137,7 +125,7 @@ const Profile: React.FC = () => {
       <div className="md:col-span-2 space-y-4">
         
         {/* Profile Header Card */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] relative pb-4 shadow-sm group">
+        <div className="bg-white rounded-lg border border-[#E6E6E6] relative pb-6 shadow-sm group">
           {/* Cover Image */}
           <div className="h-32 md:h-48 bg-gray-300 w-full rounded-t-lg overflow-hidden relative group/cover">
             <img src={profile.coverUrl} alt="Cover" className="w-full h-full object-cover" />
@@ -150,12 +138,15 @@ const Profile: React.FC = () => {
                 <Camera className="w-5 h-5" />
               </button>
             )}
+            <button className="absolute bottom-4 right-4 bg-white/90 p-1.5 rounded-full shadow text-gray-600 opacity-0 group-hover/cover:opacity-100 transition-opacity">
+              <Pencil className="w-4 h-4" />
+            </button>
           </div>
           
           <div className="px-6 relative">
             {/* Avatar */}
             <div className="absolute -top-16 md:-top-24 left-6">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white overflow-hidden bg-white shadow-sm relative group/avatar">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[6px] border-white overflow-hidden bg-white shadow-sm relative group/avatar">
                 <img src={profile.avatarUrl} alt={profile.name} className="w-full h-full object-cover" />
                 {currentUser === 'owner' && (
                   <div 
@@ -169,44 +160,34 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            {/* Actions Top Right */}
-            <div className="absolute top-4 right-4 flex gap-2 print:hidden">
-                {currentUser === 'owner' && (
-                  <Link to="/admin" className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors" title="Edit Profile">
-                    <Pencil className="w-5 h-5" />
-                  </Link>
-                )}
-            </div>
-
             {/* Basic Info */}
             <div className="pt-20 md:pt-20">
               <h1 className="text-2xl font-bold text-[#1A1A1A]">{profile.name}</h1>
-              <p className="text-base text-[#1A1A1A] mt-1">{profile.headline}</p>
+              <p className="text-[15px] text-[#1A1A1A] mt-1 leading-snug">{profile.headline}</p>
               
-              <div className="flex items-center text-sm text-[#666666] mt-2 gap-2">
+              <div className="flex items-center text-sm text-[#666666] mt-2 gap-1 flex-wrap">
                 <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {profile.location}</span>
+                <span className="mx-1">·</span>
                 <button 
                   onClick={() => setContactModalOpen(true)}
                   className="text-[#0A66C2] font-semibold cursor-pointer hover:underline outline-none print:hidden"
                 >
                   Contact Info
                 </button>
-                <span className="hidden print:inline-block ml-2 text-gray-500">{profile.contact.email}</span>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2 relative z-20 print:hidden">
                 <button 
                   onClick={() => setMsgModalOpen(true)}
-                  className="bg-[#0A66C2] text-white px-6 py-1.5 rounded-full font-semibold hover:bg-[#004182] transition-colors flex items-center gap-2"
+                  className="bg-[#0A66C2] text-white px-5 py-1.5 rounded-full font-semibold hover:bg-[#004182] transition-colors flex items-center gap-2"
                 >
-                  <Send className="w-4 h-4" /> Message
+                  <Send className="w-4 h-4 rotate-[45deg] mb-0.5" /> Message
                 </button>
                 
-                {/* More Button */}
                 <div className="relative" ref={moreMenuRef}>
                     <button 
                         onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                        className={`border border-[#666666] text-[#666666] px-6 py-1.5 rounded-full font-semibold hover:bg-gray-50 transition-colors ${moreMenuOpen ? 'bg-gray-100' : ''}`}
+                        className={`border border-[#666666] text-[#666666] px-5 py-1.5 rounded-full font-semibold hover:bg-gray-50 transition-colors ${moreMenuOpen ? 'bg-gray-100' : ''}`}
                     >
                         More
                     </button>
@@ -222,7 +203,6 @@ const Profile: React.FC = () => {
                     )}
                 </div>
 
-                {/* Email & GitHub Icons */}
                 {profile.contact.email && (
                     <a href={`mailto:${profile.contact.email}`} className="border border-[#666666] text-[#666666] p-1.5 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center w-9 h-9" title="Email">
                         <Mail className="w-5 h-5" />
@@ -233,39 +213,30 @@ const Profile: React.FC = () => {
                         <Github className="w-5 h-5" />
                     </a>
                 )}
-
-                {activeConversation && (
-                  <Link to="/messages" className="text-xs text-green-600 self-center font-medium bg-green-50 px-2 py-1 rounded hover:bg-green-100 transition-colors">
-                    View Conversation
-                  </Link>
-                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Combined About & What I'm Looking For Card */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm relative group">
-          <div className="flex justify-between items-start mb-3">
-             <h2 className="text-xl font-bold text-[#1A1A1A]">About</h2>
-             {currentUser === 'owner' && (
-               <Link to="/admin" className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded print:hidden">
-                 <Pencil className="w-4 h-4 text-gray-500" />
-               </Link>
-             )}
+        {/* About Card */}
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-[#1A1A1A] mb-4">About</h2>
+          <div className="text-sm text-[#1A1A1A] leading-relaxed whitespace-pre-wrap space-y-4">
+            {profile.aboutLong.split('\n\n').map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
           </div>
-          <p className="text-sm text-[#1A1A1A] leading-relaxed whitespace-pre-wrap">{profile.aboutLong}</p>
           
           {/* Integrated What I'm Looking For Section */}
-          <div className="mt-6 pt-6 border-t border-gray-100">
+          <div className="mt-8 pt-6 border-t border-gray-100">
              <h3 className="text-lg font-bold text-[#1A1A1A] mb-3 flex items-center gap-2">
                 <Briefcase className="w-5 h-5 text-[#0A66C2]" />
                 What I'm Looking For
              </h3>
-             <ul className="space-y-2">
+             <ul className="space-y-3">
                  {profile.whatLookingFor?.map((item, idx) => (
                      <li key={idx} className="text-sm text-[#1A1A1A] flex items-start gap-2">
-                        <span className="text-[#0A66C2] mt-1">•</span>
+                        <span className="text-[#0A66C2] mt-1.5 w-1 h-1 bg-[#0A66C2] rounded-full shrink-0"></span>
                         {item}
                      </li>
                  ))}
@@ -274,31 +245,22 @@ const Profile: React.FC = () => {
         </div>
 
         {/* Experience Card */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm relative group">
-          <div className="flex justify-between items-start mb-4">
-             <h2 className="text-xl font-bold text-[#1A1A1A]">Experience</h2>
-             {currentUser === 'owner' && (
-               <Link to="/admin" className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded print:hidden">
-                 <Pencil className="w-4 h-4 text-gray-500" />
-               </Link>
-             )}
-          </div>
-          <div className="space-y-6">
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-[#1A1A1A] mb-6">Experience</h2>
+          <div className="space-y-8">
             {profile.experience.map((exp) => (
               <div key={exp.id} className="flex gap-4 items-start">
-                 {/* Logo Logic */}
                  <LogoImage logoUrl={exp.logoUrl} name={exp.company} />
-
-                 <div className="flex-1 flex flex-col pb-6 border-b border-gray-100 last:border-0 last:pb-0">
-                    <h3 className="font-bold text-lg text-[#1A1A1A] leading-tight">{exp.title}</h3>
-                    <div className="text-base font-medium text-[#1A1A1A] mt-1">
-                        {exp.company}
+                 <div className="flex-1">
+                    <h3 className="font-bold text-[16px] text-[#1A1A1A]">{exp.title}</h3>
+                    <div className="text-sm text-[#1A1A1A] mt-0.5">
+                        <span className="font-medium">{exp.company}</span>
                         {exp.employmentType && (
                             <span className="font-normal text-gray-500"> · {exp.employmentType}</span>
                         )}
                     </div>
-                    <div className="text-sm text-[#666666] mt-1 mb-2">{exp.dates} • {exp.location}</div>
-                    <ul className="list-disc list-outside ml-4 text-sm text-[#1A1A1A] space-y-1.5 leading-relaxed">
+                    <div className="text-sm text-[#666666] mt-0.5">{exp.dates} · {exp.location}</div>
+                    <ul className="list-disc list-outside ml-4 mt-3 text-sm text-[#1A1A1A] space-y-2 leading-relaxed">
                         {exp.description.map((line, i) => (
                             <li key={i}>{line}</li>
                         ))}
@@ -310,30 +272,23 @@ const Profile: React.FC = () => {
         </div>
 
         {/* Projects Card */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm relative group">
-          <div className="flex justify-between items-start mb-4">
-             <h2 className="text-xl font-bold text-[#1A1A1A]">Projects</h2>
-             {currentUser === 'owner' && (
-               <Link to="/admin" className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded print:hidden">
-                 <Pencil className="w-4 h-4 text-gray-500" />
-               </Link>
-             )}
-          </div>
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-[#1A1A1A] mb-6">Projects</h2>
           <div className="space-y-4">
             {profile.projects.map((proj) => (
-                <div key={proj.id} className="border border-[#E6E6E6] rounded p-4 hover:shadow-md transition-shadow">
+                <div key={proj.id} className="bg-gray-50 border border-[#E6E6E6] rounded-lg p-5 group transition-all">
                     <div className="flex justify-between items-start">
-                        <h3 className="font-semibold text-base text-[#1A1A1A]">{proj.name}</h3>
+                        <h3 className="font-bold text-[16px] text-[#1A1A1A] group-hover:text-[#0A66C2] transition-colors">{proj.name}</h3>
                         {proj.link && proj.link !== '#' && (
                              <a href={proj.link} target="_blank" rel="noreferrer" className="text-[#0A66C2] hover:underline">
                                 <LinkIcon className="w-4 h-4" />
                             </a>
                         )}
                     </div>
-                    <p className="text-sm text-[#1A1A1A] mt-2">{proj.description}</p>
-                    <div className="flex flex-wrap gap-2 mt-3">
+                    <p className="text-sm text-gray-600 mt-2 leading-relaxed">{proj.description}</p>
+                    <div className="flex flex-wrap gap-2 mt-4">
                         {proj.stack.map(tech => (
-                            <span key={tech} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-medium">{tech}</span>
+                            <span key={tech} className="bg-white border border-gray-200 text-gray-500 px-2.5 py-1 rounded text-[11px] font-medium">{tech}</span>
                         ))}
                     </div>
                 </div>
@@ -342,23 +297,16 @@ const Profile: React.FC = () => {
         </div>
         
         {/* Education Card */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm relative group">
-          <div className="flex justify-between items-start mb-4">
-             <h2 className="text-xl font-bold text-[#1A1A1A]">Education</h2>
-             {currentUser === 'owner' && (
-               <Link to="/admin" className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded print:hidden">
-                 <Pencil className="w-4 h-4 text-gray-500" />
-               </Link>
-             )}
-          </div>
-          <div className="space-y-6">
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-[#1A1A1A] mb-6">Education</h2>
+          <div className="space-y-8">
             {profile.education.map((edu) => (
               <div key={edu.id} className="flex gap-4 items-start">
                  <LogoImage logoUrl={edu.logoUrl} name={edu.school} />
-                 <div className="flex-1 flex flex-col pb-6 border-b border-gray-100 last:border-0 last:pb-0">
-                    <h3 className="font-semibold text-base text-[#1A1A1A]">{edu.school}</h3>
-                    <div className="text-sm text-[#1A1A1A]">{edu.degree}</div>
-                    <div className="text-xs text-[#666666] mt-1">{edu.dates}</div>
+                 <div className="flex-1">
+                    <h3 className="font-bold text-[16px] text-[#1A1A1A]">{edu.school}</h3>
+                    <div className="text-sm text-[#1A1A1A] mt-0.5">{edu.degree}</div>
+                    <div className="text-sm text-[#666666] mt-0.5">{edu.dates}</div>
                  </div>
               </div>
             ))}
@@ -371,70 +319,48 @@ const Profile: React.FC = () => {
       <div className="md:col-span-1 space-y-4">
         
         {/* Let's Collaborate Section */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm relative overflow-hidden print:hidden group">
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-100/50 rounded-full blur-2xl pointer-events-none"></div>
-            
-            <div className="flex justify-between items-start mb-3 relative z-10">
-                <h2 className="text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-amber-500" /> Let's Collaborate
-                </h2>
-                {currentUser === 'owner' && (
-                  <Link to="/admin" className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition-opacity">
-                    <Pencil className="w-4 h-4 text-gray-500" />
-                  </Link>
-                )}
-            </div>
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm relative overflow-hidden print:hidden">
+            <h2 className="text-[17px] font-bold text-[#1A1A1A] mb-3">
+                {profile.collaborateSubtitle || "for someone who"}
+            </h2>
 
-            <p className="text-sm text-gray-900 mb-3 font-semibold relative z-10 leading-relaxed">
-                {profile.collaborateSubtitle}
-            </p>
-            
-            <ul className="space-y-2 relative z-10 mb-4">
+            <ul className="space-y-4 mb-4">
                 {profile.collaborateBullets.map((bullet, idx) => {
-                    const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500'];
+                    const colors = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500'];
                     return (
                         <li key={idx} className="flex items-start gap-3">
-                            <div className={`w-1.5 h-1.5 rounded-full ${colors[idx % colors.length]} shrink-0 mt-1.5`}></div>
-                            <p className="text-sm text-gray-700">{bullet}</p>
+                            <div className={`w-2 h-2 rounded-full ${colors[idx % colors.length]} shrink-0 mt-1.5`}></div>
+                            <p className="text-[14px] text-gray-700 leading-snug">{bullet}</p>
                         </li>
                     );
                 })}
             </ul>
 
-            <p className="text-sm text-gray-900 font-medium mb-2 relative z-10">
-                I would love to have a chat
-            </p>
-
-            <div className="text-right mt-2">
-                 <button 
+            <div className="mt-6">
+                <p className="text-[14px] text-gray-900 font-bold mb-1">
+                    I would love to have a chat
+                </p>
+                <button 
                     onClick={() => setMsgModalOpen(true)} 
-                    className="text-[#0A66C2] font-bold text-sm flex items-center justify-end gap-1 hover:underline hover:text-[#004182]"
+                    className="text-[#0A66C2] font-bold text-[14px] flex items-center gap-1 hover:underline"
                 >
                     Message me <ArrowRight className="w-4 h-4" />
-                 </button>
+                </button>
             </div>
         </div>
 
         {/* Skills Card */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-4 shadow-sm relative group">
-             <div className="flex justify-between items-center mb-2">
-                <h2 className="font-semibold text-base text-[#1A1A1A]">Skills</h2>
-                {currentUser === 'owner' && (
-                   <Link to="/admin" className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded print:hidden">
-                     <Pencil className="w-4 h-4 text-gray-500" />
-                   </Link>
-                )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-                {profile.skills.map((skill, i) => (
-                    <div key={i} className="w-full border-b border-gray-100 py-2 last:border-0 flex justify-between items-center group">
-                        <span className="text-sm font-semibold text-[#1A1A1A]">{skill}</span>
-                        <Plus className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 cursor-pointer print:hidden" />
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm">
+            <h2 className="font-bold text-[17px] text-[#1A1A1A] mb-4">Skills</h2>
+            <div className="space-y-4">
+                {profile.skills.slice(0, 10).map((skill, i) => (
+                    <div key={i} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                        <span className="text-[15px] font-bold text-gray-700">{skill}</span>
                     </div>
                 ))}
             </div>
-            <div className="mt-4 pt-2 border-t text-center print:hidden">
-                 <button className="text-[#666666] font-semibold text-sm hover:text-[#1A1A1A] hover:bg-gray-50 w-full py-1 rounded">Show all skills</button>
+            <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+                 <button className="text-[#666666] font-bold text-[14px] hover:text-[#1A1A1A] w-full">Show all skills</button>
             </div>
         </div>
 
@@ -444,26 +370,24 @@ const Profile: React.FC = () => {
         </div>
 
         {/* Ad Placeholder */}
-        <div className="bg-[#F4F4F4] rounded-lg p-4 text-center print:hidden">
-             <p className="text-xs text-gray-500">Promoted</p>
-             <div className="mt-2 h-20 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm text-center print:hidden">
+             <p className="text-[11px] text-gray-400 mb-4 uppercase tracking-wider font-semibold">Promoted</p>
+             <div className="mt-2 h-24 bg-[#EDF3F8] rounded flex items-center justify-center text-gray-400 text-sm font-medium">
                 Recruiters Love This App
              </div>
         </div>
 
-        <div className="text-xs text-center text-gray-500 print:hidden">
+        <div className="text-[12px] text-center text-gray-500 py-4 print:hidden">
             LinkedIn Replacer © {new Date().getFullYear()}
         </div>
       </div>
 
-      {/* Crisp Pre-Chat Modal */}
       <CustomCrispChat 
         isOpen={msgModalOpen}
         onClose={() => setMsgModalOpen(false)}
         profileName={profile.name}
       />
 
-      {/* Contact Info Modal */}
       {contactModalOpen && (
           <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 animate-fade-in print:hidden">
               <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden">

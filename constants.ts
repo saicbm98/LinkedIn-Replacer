@@ -1,4 +1,3 @@
-
 import { ProfileContent } from './types';
 
 export const ADMIN_PASSWORD = "admin123";
@@ -6,23 +5,23 @@ export const RECOVERY_CODE = "recovery";
 
 export const INITIAL_PROFILE: ProfileContent = {
   name: "Sai Medicherla",
-  headline: "AI-Based No-Code Operator | Workflow Optimiser | Ex-Insurance Analyst",
-  location: "United Kingdom",
+  headline: "AI Automation & Ops Specialist | n8n Workflows | I build practical automation to reduce manual ops and help and help teams scale faster",
+  location: "New Zealand",
   shortSummary: "I streamline manual workflows and help teams scale using Airtable, Zapier, and Gen AI tools.",
-  aboutLong: "Thanks for stopping by. 👋\n\nI am a dynamic technical professional with a diverse academic background in Engineering and International Relations. I specialize in data-focused problem-solving and driving operational excellence through AI automation and no-code platforms.\n\nI have over 2 years of experience in ops-heavy analyst roles across insurance tech and higher education. My focus is on identifying inefficiencies and building scalable solutions without the need for traditional heavy coding. I streamline messy workflows using tools like Airtable, Zapier, Relay, and ChatGPT.\n\nI am a 'brilliant generalist' at heart—obsessed with improving how things work and helping teams scale with simple, clear, and efficient processes.",
+  aboutLong: "Thanks for stopping by. 👋\n\nI'm a technical ops analyst who turns messy processes into workable systems using automation and practical AI tools.\n\nI have 2+ years of experience in ops-heavy analyst roles across insurance, customer operations, and higher education. My background combines a Bachelor's in Electronics & Communication Engineering with an MSc in International Relations from the University of Bristol, so I'm super comfortable moving quickly between technical details and business priorities, and between teams when things get stuck.\n\nI'm obsessed with spotting process and product inefficiencies, then fixing them with AI automation and no-code platforms like n8n, Zapier, and Airtable. Recently, I recently built QueueSense, an AI-assisted customer support ticketing workflow, plus this website and several end-to-end n8n automations that eliminated repetitive manual work. Many more to come!\n\nI'm equally comfortable strategising an approach or getting my hands dirty in the weeds of implementation, whatever the problem needs.\n\nIf you're looking for an AI-confident operator who can turn messy ideas into workable systems using automation and AI, I'd love to chat!",
   experience: [
     {
       id: '1',
-      company: "Migreats",
+      company: "migreats",
       title: "Operations and Product",
       dates: "Jul 2025 - Sept 2025",
       location: "London, UK (Remote)",
       description: [
-        "Map and streamline community and events workflows to remove friction and clarify owners and handoffs.",
-        "Analyse engagement and operations data to surface bottlenecks and simple wins that move key metrics.",
-        "Co-create lightweight internal tools with founders to speed up execution in a fast-moving startup context."
+        "Built and managed a guest sourcing and outreach pipeline for community events, tracking status and follow ups end to end.",
+        "Created webinar assets (slides, alignment docs, speaker briefs) and coordinated speaker comms and event logistics.",
+        "Systematised community operations with lightweight docs and repeatable workflows (templates, checklists, SOPs) to reduce back and forth."
       ],
-      logoUrl: "https://ui-avatars.com/api/?name=Migreats&background=random",
+      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download.png?raw=true",
       employmentType: "Contract"
     },
     {
@@ -32,12 +31,12 @@ export const INITIAL_PROFILE: ProfileContent = {
       dates: "Nov 2023 - Oct 2024",
       location: "Bristol, UK",
       description: [
-        "Led analysis for 1,500+ policies with a value over £30 million to improve data quality and decisions.",
-        "Used Excel with 100+ policy data points to underwrite around four policies per hour with high accuracy.",
-        "Partnered with Claims, Sales, and IT to redesign and automate internal steps, cutting cycle time by ~30%.",
-        "Proposed an AI referral helper that reduced handling time by ~20% and initiated wider AI discussions."
+        "Led data analysis for 1500+ policies worth £30 million+, collaborating with internal stakeholders to maintain data quality and accuracy, negotiate terms and make effective policy decisions.",
+        "Forecasted policy risk using 100+ data points in Excel, leveraging the insights to underwrite 4 policies/hour with accurate, high-quality decisions.",
+        "Collaborated cross-functionally with Claims, Sales and IT teams to optimise and automate key internal processes, reducing the overall policy processing time by 30%.",
+        "Identified key operational bottlenecks and proposed an AI-powered referral tool, cutting referral handling time by 20% and initiating broader conversations on using AI to streamline ops and improve delivery."
       ],
-      logoUrl: "https://logo.clearbit.com/nfumutual.co.uk",
+      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download%20(1).png?raw=true",
       employmentType: "Full-time"
     },
     {
@@ -47,10 +46,9 @@ export const INITIAL_PROFILE: ProfileContent = {
       dates: "Mar 2023 - Oct 2023",
       location: "Bristol, UK",
       description: [
-        "Turned multi-source customer feedback into concrete fixes, reducing response time by ~20%.",
-        "Kept satisfaction at over 90% during process changes."
+        "Analysed 5+ parameters of customer feedback data, identifying operational bottlenecks and implementing solutions that cut response times by 20% while maintaining 90%+ customer satisfaction."
       ],
-      logoUrl: "https://logo.clearbit.com/myvue.com",
+      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download%20(2).png?raw=true",
       employmentType: "Full-time"
     },
     {
@@ -60,10 +58,10 @@ export const INITIAL_PROFILE: ProfileContent = {
       dates: "Nov 2021 - May 2022",
       location: "Bristol, UK",
       description: [
-        "Analysed over 1,000 student feedback inputs against the Quality Framework and highlighted gaps.",
-        "Presented 10+ improvements to department leads and landed changes that lifted satisfaction by ~20%."
+        "Analysed the University Quality Framework based on feedback from 1000+ students, leveraging data insights to present 10+ process enhancements to senior department members.",
+        "Established and maintained strong relationships with 5+ key stakeholders, resolving 80% of identified issues and driving a 20% improvement in student satisfaction scores."
       ],
-      logoUrl: "https://logo.clearbit.com/bristol.ac.uk",
+      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download%20(4).png?raw=true",
       employmentType: "Part-time"
     },
     {
@@ -73,11 +71,11 @@ export const INITIAL_PROFILE: ProfileContent = {
       dates: "Jul 2020 - May 2021",
       location: "Bangalore, India",
       description: [
-        "Built a data framework that removed key inefficiencies and pushed testing efficiency toward 90%.",
-        "Delivered over 95% accuracy on large client datasets used for engineering decisions.",
-        "Coordinated 10+ internal and external stakeholders across projects."
+        "Built a new data framework that resolved 5+ inefficiencies, boosting overall product testing efficiency to 90%.",
+        "Delivered 95%+ accuracy while analysing large client datasets using our internal framework, supporting data-led decision-making across multiple projects.",
+        "Managed relationships with 10+ internal and external stakeholders, delivering 100+ technical solutions."
       ],
-      logoUrl: "https://logo.clearbit.com/analog.com",
+      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/Analog%20Devices.jpg?raw=true",
       employmentType: "Contract"
     }
   ],
@@ -87,14 +85,14 @@ export const INITIAL_PROFILE: ProfileContent = {
       school: "University of Bristol",
       degree: "MSc International Relations",
       dates: "2021 - 2022",
-      logoUrl: "https://logo.clearbit.com/bristol.ac.uk"
+      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download%20(4).png?raw=true"
     },
     {
       id: '2',
       school: "NIT Jamshedpur",
       degree: "BTech Electronics and Communication Engineering",
       dates: "2015 - 2019",
-      logoUrl: "https://logo.clearbit.com/nitjsr.ac.in"
+      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/nitjsr.jpg?raw=true"
     }
   ],
   projects: [
@@ -102,42 +100,44 @@ export const INITIAL_PROFILE: ProfileContent = {
       id: '1',
       name: "Pomodoro Accountability Bot (Discord)",
       description: "Group focus tool for a peer job seeking circle with custom intervals. Posts live countdowns and breaks in a shared channel for lightweight accountability.",
-      stack: ["Discord API", "Automation"],
+      stack: ["Process automation", "Workflow design", "Vibe coding", "Discord bot development", "Logging and debugging", "Deployment basics"],
       link: "https://github.com/saicbm98"
     },
     {
       id: '2',
       name: "LinkedIn Replacer",
       description: "A professional profile web app with integrated messaging, AI profile Q&A, and SOC evaluator. Features a clean, network-style UI for recruiters and hiring managers.",
-      stack: ["React", "TypeScript", "Tailwind CSS", "Gemini API"],
+      stack: ["React", "TypeScript", "Tailwind CSS", "Gemini API", "Claude", "Workflow design", "Google AI Studio", "Debugging", "Vibe coding", "Database integration"],
       link: "https://github.com/saicbm98"
     },
     {
       id: '3',
-      name: "QueSense",
+      name: "QueueSense",
       description: "QueueSense is an AI helper app for support teams at B2B SaaS companies. It reads support tickets, shows the important details about each customer, and writes reply drafts so agents can clear the queue faster with less effort. It is a demo and portfolio project, but it should feel like a real support tool for a mid sized B2B SaaS company.",
       stack: ["React", "Firebase", "Tailwind"],
       link: "https://github.com/saicbm98/quesense"
     }
   ],
   skills: [
-    "Airtable", "Zapier", "Relay", "ChatGPT", "n8n", "Excel", "Slack", "Gemini", 
-    "Operations Strategy", "Process Improvement", "Data Analysis", "No-Code Ops"
+    "n8n", "Excel", "Slack", "Gemini", "Operations Strategy", "Process Improvement", 
+    "Data Analysis", "No-Code Ops", "AI Automation", "Google AI Studio", 
+    "Strategic Planning", "Prompt Engineering"
   ],
   whatLookingFor: [
-    "Immediate entry to mid-level Business Ops, Product Ops, or General Ops roles."
+    "AI Operations, Automation Engineering, or Product Ops roles where I automate manual processes and build AI-powered operational systems",
+    "Teams that value shipping fast and solving messy operational problems"
   ],
-  collaborateSubtitle: "Are you a founder hiring manager or recruiter looking for someone who",
+  collaborateSubtitle: "Are you a founder, hiring manager or recruiter looking for someone who",
   collaborateBullets: [
-    "Is obsessed with improving how things work and learns fast from setbacks",
-    "Uses AI and no code tools to make operations faster and more efficient",
-    "Brings whatever it takes to help you hit mission critical goals"
+    "Fixes your operational headaches with AI-powered automation (n8n, Zapier, custom workflows)",
+    "Builds workflows that help you scale your team quickly and efficiently",
+    "Works across the full spectrum from high-level planning to hands-on implementation, whatever the problem needs"
   ],
   contact: {
     email: "medicherlasaicharan@gmail.com",
     githubUrl: "https://github.com/saicbm98",
-    whatsappLink: "#"
+    whatsappLink: "https://wa.me/447436950058"
   },
-  avatarUrl: "https://ui-avatars.com/api/?name=Sai+Medicherla&background=0A66C2&color=fff",
-  coverUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format&fit=crop"
+  avatarUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/IMG-20230227-WA0019.jpg?raw=true",
+  coverUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/LinkedIn%20Background%20Photo.png?raw=true"
 };

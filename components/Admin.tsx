@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store.tsx';
-import { Save, Plus, Trash, X, Camera, RotateCcw, Lock, Database, Check, AlertTriangle, Zap } from 'lucide-react';
-import { Experience, Project } from '../types.ts';
+import { Save, Plus, Trash, X, Camera, RotateCcw, Lock, Database, Check, AlertTriangle, Zap, Briefcase } from 'lucide-react';
+import { Experience, Project, Education } from '../types.ts';
 
 const Admin: React.FC = () => {
   const { profile, updateProfile, currentUser, changePassword, firebaseConfig, setFirebaseConfig, isFirebaseConnected } = useStore();
@@ -41,7 +41,8 @@ const Admin: React.FC = () => {
             ...proj,
             stack: proj.stack.map(s => s.trim()).filter(Boolean)
         })),
-        collaborateBullets: localProfile.collaborateBullets.map(b => b.trim()).filter(Boolean)
+        collaborateBullets: localProfile.collaborateBullets.map(b => b.trim()).filter(Boolean),
+        whatLookingFor: localProfile.whatLookingFor.map(b => b.trim()).filter(Boolean)
     };
     updateProfile(cleanedProfile);
     setSaved(true);
@@ -111,6 +112,17 @@ const Admin: React.FC = () => {
     handleChange('experience', [newExp, ...localProfile.experience]);
   };
 
+  const handleAddEducation = () => {
+    const newEdu: Education = {
+        id: Date.now().toString(),
+        school: '',
+        degree: '',
+        dates: '',
+        logoUrl: ''
+    };
+    handleChange('education', [newEdu, ...localProfile.education]);
+  };
+
   const handleAddProject = () => {
     const newProj: Project = {
       id: Date.now().toString(),
@@ -158,16 +170,35 @@ const Admin: React.FC = () => {
       reader.readAsDataURL(file);
   };
 
+  const handleEduLogoUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Image is too large. Please choose an image under 2MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        const newEdu = [...localProfile.education];
+        newEdu[index].logoUrl = base64String;
+        handleChange('education', newEdu);
+      };
+      reader.readAsDataURL(file);
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 pb-20">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-[#1A1A1A]">Edit Profile</h1>
-        <button 
-            onClick={handleSave}
-            className="bg-[#0A66C2] text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 hover:bg-[#004182] transition-all"
-        >
-            <Save className="w-4 h-4" /> {saved ? 'Saved!' : 'Save Changes'}
-        </button>
+        <div className="flex items-center gap-3">
+            <button 
+                onClick={handleSave}
+                className="bg-[#0A66C2] text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 hover:bg-[#004182] transition-all"
+            >
+                <Save className="w-4 h-4" /> {saved ? 'Saved!' : 'Save Changes'}
+            </button>
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -249,15 +280,16 @@ const Admin: React.FC = () => {
         {/* Let's Collaborate Section Editor */}
         <section className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm space-y-4">
              <div className="flex justify-between items-center border-b pb-2">
-                <h2 className="text-lg font-semibold flex items-center gap-2"><Zap className="w-4 h-4 text-amber-500" /> Collaboration Settings</h2>
+                <h2 className="text-lg font-semibold flex items-center gap-2"><Zap className="w-4 h-4 text-amber-500" /> Collaboration Settings (Sidebar)</h2>
              </div>
              <div className="space-y-3">
-                <label className="block text-xs font-bold text-gray-500 uppercase">Subtitle / Intro Line</label>
-                <textarea 
+                <label className="block text-xs font-bold text-gray-500 uppercase">Sidebar Box Heading</label>
+                <input 
+                    type="text"
                     value={localProfile.collaborateSubtitle} 
                     onChange={e => handleChange('collaborateSubtitle', e.target.value)}
-                    placeholder="Are you a founder hiring manager or recruiter looking for someone who"
-                    className="w-full border rounded p-2 focus:ring-1 focus:ring-[#0A66C2] outline-none text-sm h-16"
+                    placeholder="for someone who"
+                    className="w-full border rounded p-2 focus:ring-1 focus:ring-[#0A66C2] outline-none text-sm"
                 />
                 
                 <label className="block text-xs font-bold text-gray-500 uppercase">Value Points (one per line)</label>
@@ -266,8 +298,25 @@ const Admin: React.FC = () => {
                     placeholder="Enter your key collaboration points..."
                     value={localProfile.collaborateBullets.join('\n')} 
                     onChange={(e) => {
-                        // Split by newline but don't filter immediately so user can type new lines
                         handleChange('collaborateBullets', e.target.value.split('\n'));
+                    }} 
+                />
+             </div>
+        </section>
+
+        {/* What I'm Looking For Editor */}
+        <section className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm space-y-4">
+             <div className="flex justify-between items-center border-b pb-2">
+                <h2 className="text-lg font-semibold flex items-center gap-2"><Briefcase className="w-4 h-4 text-[#0A66C2]" /> What I'm Looking For (About Section)</h2>
+             </div>
+             <div className="space-y-3">
+                <label className="block text-xs font-bold text-gray-500 uppercase">Bullet Points (one per line)</label>
+                <textarea 
+                    className="w-full border p-2 rounded text-sm h-32 focus:ring-1 focus:ring-[#0A66C2] outline-none" 
+                    placeholder="Enter what you're looking for..."
+                    value={localProfile.whatLookingFor.join('\n')} 
+                    onChange={(e) => {
+                        handleChange('whatLookingFor', e.target.value.split('\n'));
                     }} 
                 />
              </div>
@@ -360,7 +409,6 @@ const Admin: React.FC = () => {
                                 onChange={(e) => {
                                     const val = e.target.value;
                                     const newProjs = [...localProfile.projects];
-                                    // Use raw split to allow typing commas and spaces without them being stripped immediately
                                     newProjs[idx].stack = val.split(',').map(s => s.trimStart());
                                     handleChange('projects', newProjs);
                                 }} 
@@ -422,7 +470,6 @@ const Admin: React.FC = () => {
                                 value={exp.description.join('\n')} 
                                 onChange={(e) => {
                                     const newExp = [...localProfile.experience];
-                                    // Split by newline but don't filter so user can type new lines
                                     newExp[idx].description = e.target.value.split('\n');
                                     handleChange('experience', newExp);
                                 }} 
@@ -432,6 +479,51 @@ const Admin: React.FC = () => {
                 </div>
             ))}
         </section>
+
+        {/* Education Editor */}
+        <section className="bg-white rounded-lg border border-[#E6E6E6] p-6 shadow-sm space-y-4">
+            <div className="flex justify-between items-center border-b pb-2">
+                <h2 className="text-lg font-semibold">Education</h2>
+                <button onClick={handleAddEducation} className="text-[#0A66C2] text-sm font-medium flex items-center gap-1 hover:bg-blue-50 px-2 py-1 rounded transition-colors">
+                    <Plus className="w-3 h-3" /> Add Education
+                </button>
+            </div>
+            {localProfile.education.map((edu, idx) => (
+                <div key={edu.id} className="border p-4 rounded bg-gray-50 relative mb-4">
+                     <button onClick={() => handleChange('education', localProfile.education.filter((_, i) => i !== idx))} className="absolute top-2 right-2 text-red-400 hover:text-red-600 flex items-center gap-1 text-xs">
+                        <Trash className="w-3 h-3" /> Remove
+                     </button>
+                     <div className="flex gap-4 items-start mt-4">
+                        <div className="flex flex-col items-center gap-2">
+                            {edu.logoUrl ? <img src={edu.logoUrl} className="w-12 h-12 object-contain bg-white rounded border" /> : <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-[10px] text-gray-400">LOGO</div>}
+                            <label className="cursor-pointer text-[#0A66C2] text-[10px] font-bold uppercase hover:underline">
+                                Upload <input type="file" className="hidden" accept="image/*" onChange={(e) => handleEduLogoUpload(e, idx)} />
+                            </label>
+                        </div>
+                        <div className="flex-1 space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                                <input value={edu.school} className="border p-2 rounded text-sm font-semibold" placeholder="School / University" onChange={(e) => {
+                                    const newEdu = [...localProfile.education];
+                                    newEdu[idx].school = e.target.value;
+                                    handleChange('education', newEdu);
+                                }} />
+                                <input value={edu.degree} className="border p-2 rounded text-sm" placeholder="Degree / Qualification" onChange={(e) => {
+                                    const newEdu = [...localProfile.education];
+                                    newEdu[idx].degree = e.target.value;
+                                    handleChange('education', newEdu);
+                                }} />
+                            </div>
+                            <input value={edu.dates} className="w-full border p-2 rounded text-xs" placeholder="Dates (e.g. 2021 - 2022)" onChange={(e) => {
+                                const newEdu = [...localProfile.education];
+                                newEdu[idx].dates = e.target.value;
+                                handleChange('education', newEdu);
+                            }} />
+                        </div>
+                     </div>
+                </div>
+            ))}
+        </section>
+
       </div>
     </div>
   );
