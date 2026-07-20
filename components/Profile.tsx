@@ -73,6 +73,7 @@ const Profile: React.FC = () => {
   const [msgModalOpen, setMsgModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
   
   // More menu state
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -234,9 +235,22 @@ const Profile: React.FC = () => {
                 </div>
 
                 {profile.contact.email && (
-                    <a href={`mailto:${profile.contact.email}`} className="border border-[#666666] text-[#666666] p-1.5 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center w-9 h-9" title="Email">
+                    <button 
+                        onClick={() => {
+                            navigator.clipboard.writeText(profile.contact.email);
+                            setEmailCopied(true);
+                            setTimeout(() => setEmailCopied(false), 2000);
+                        }}
+                        className="border border-[#666666] text-[#666666] p-1.5 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center w-9 h-9 relative cursor-pointer" 
+                        title="Copy Email Address"
+                    >
                         <Mail className="w-5 h-5" />
-                    </a>
+                        {emailCopied && (
+                            <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2.5 py-1.5 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none animate-fade-in font-medium">
+                                Email copied
+                            </span>
+                        )}
+                    </button>
                 )}
                 {profile.contact.githubUrl && (
                     <a href={profile.contact.githubUrl} target="_blank" rel="noreferrer" className="border border-[#666666] text-[#666666] p-1.5 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center w-9 h-9" title="GitHub">
@@ -336,7 +350,7 @@ const Profile: React.FC = () => {
                  <div className="flex-1">
                     <h3 className="font-bold text-[16px] text-[#1A1A1A]">{edu.school}</h3>
                     <div className="text-sm text-[#1A1A1A] mt-0.5">{edu.degree}</div>
-                    <div className="text-sm text-[#666666] mt-0.5">{edu.dates}</div>
+                    <div className="text-sm text-[#666666] mt-0.5">{edu.dates}{edu.location ? ` · ${edu.location}` : ''}</div>
                  </div>
               </div>
             ))}
@@ -406,12 +420,22 @@ const Profile: React.FC = () => {
             <AIChatWidget />
         </div>
 
-        {/* Ad Placeholder */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm text-center print:hidden">
-             <p className="text-[11px] text-gray-400 mb-4 uppercase tracking-wider font-semibold">Promoted</p>
-             <div className="mt-2 h-24 bg-[#EDF3F8] rounded flex items-center justify-center text-gray-400 text-sm font-medium">
-                Recruiters Love This App
-             </div>
+        {/* At a Glance */}
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm print:hidden">
+             <h2 className="text-[17px] font-bold text-[#1A1A1A] mb-4">At a Glance</h2>
+             <ul className="space-y-3">
+                 {[
+                     '2+ years across insurance, ops and process improvement',
+                     '15+ AI automations and workflows built and shipped',
+                     'Built with Claude Code, n8n and Google AI Studio',
+                     'This site is one of them'
+                 ].map((point, idx) => (
+                     <li key={idx} className="flex items-start gap-3">
+                         <span className="text-[#0A66C2] mt-1.5 w-1.5 h-1.5 bg-[#0A66C2] rounded-full shrink-0"></span>
+                         <p className="text-[14px] text-gray-700 leading-snug">{point}</p>
+                     </li>
+                 ))}
+             </ul>
         </div>
 
 

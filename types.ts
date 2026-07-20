@@ -15,6 +15,7 @@ export interface Education {
   school: string;
   degree: string;
   dates: string;
+  location?: string;
   description: string[];
   logoUrl?: string;
 }

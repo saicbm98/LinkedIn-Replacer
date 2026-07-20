@@ -17,9 +17,9 @@ async function startServer() {
         return res.status(400).json({ error: "Missing question or profile" });
       }
 
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       if (!apiKey) {
-        console.error("❌ GEMINI_API_KEY is not defined in the environment.");
+        console.error("❌ Gemini API key is not defined in the environment (neither GEMINI_API_KEY nor GOOGLE_API_KEY is set).");
         return res.status(500).json({ error: "Gemini API key is not configured." });
       }
 
@@ -68,7 +68,7 @@ Rules:
 7. Do not use bullet points. Answer in natural, flowing prose.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3.5-flash",
         contents: `Profile Data:\n${profileContext}\n\nQuestion: ${question}`,
         config: {
           systemInstruction: systemInstruction,
@@ -90,7 +90,7 @@ Rules:
         return res.status(400).json({ error: "Missing message" });
       }
 
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       if (!apiKey) {
         return res.status(500).json({ error: "Gemini API key is not configured." });
       }
@@ -98,7 +98,7 @@ Rules:
       const ai = new GoogleGenAI({ apiKey });
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3.5-flash",
         contents: `Analyze the following message for spam, abuse, or malicious intent. 
         Message: "${message}"`,
         config: {
@@ -133,7 +133,7 @@ Rules:
         return res.status(400).json({ error: "Missing title or description" });
       }
 
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       if (!apiKey) {
         return res.status(500).json({ error: "Gemini API key is not configured." });
       }

@@ -1,13 +1,13 @@
 import { ProfileContent } from './types';
 
-export const INITIAL_PROFILE_VERSION = 4; // Increment this to force reset visitor's local storage
+export const INITIAL_PROFILE_VERSION = 6; // Increment this to force reset visitor's local storage
 
 export const INITIAL_PROFILE: ProfileContent = {
   name: "Sai Medicherla",
   headline: "Operations & Process Improvement Specialist | Experience in Insurance + Tech | I improve processes and help teams work more efficiently, saving cost and time | AI workflow builder",
-  location: "New Zealand",
+  location: "Auckland, New Zealand",
   shortSummary: "Operations and process improvement customer-facing professional with experience across insurance, technology and higher education.",
-  aboutLong: "Thanks for stopping by. 👋\n\nI'm an ops and process improvement professional with experience across insurance, technology, and higher education. Background in electronics engineering and international relations, so I'm comfortable moving between technical detail and a business-oriented mindset effortlessly.\n\nI have 2+ years in ops and ops-adjacent analyst roles, managing high volumes, maintaining accuracy under pressure, and working cross-functionally to find and solve process inefficiencies.\n\nI have built several end-to-end workflows, tools and websites using n8n, Google AI Studio, and Claude Code that simplify and automate manual work.",
+  aboutLong: "Thanks for stopping by. 🖐\n\nI am an Ops and Process Improvement Professional with 2+ years of experience. I have a background in engineering and international relations, and I have worked across a variety of client facing roles, both technical and non-technical. This unique mix is what pulled me into Ops roles in the first place.\n\nI stayed in ops because I loved managing the day to day, and realised I have a knack for identifying where things are going wrong and knowing how to fix them. I've been doing exactly that in my most recent roles.\n\nIn my insurance role at NFU Mutual, I managed high volumes, stayed accurate under pressure, worked across teams, and liaised with stakeholders. I stepped up with my ops involvement and managed day to day ops end to end at a tech-driven startup.\n\nThat fascination (read: obsession!) with improving things led me to realise I could build the improvements myself. I upskilled in AI building, and I've since put together several end to end workflows, tools and website projects using Claude Code, n8n, Google AI Studio and Lovable, including this site and its embedded AI systems. The common theme across all of them is solving process inefficiencies, making things faster and simpler for whoever's on the other end.\n\nAlways happy to chat. You can reach me at medicherlasaicharan@gmail.com.",
   experience: [
     {
       id: '1',
@@ -90,7 +90,8 @@ export const INITIAL_PROFILE: ProfileContent = {
       id: '1',
       school: "University of Bristol",
       degree: "MSc International Relations",
-      dates: "2021 - 2022",
+      dates: "2021 – 2022",
+      location: "Bristol, UK",
       description: [],
       logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178340/bristol_vibybq.png"
     },
@@ -98,7 +99,8 @@ export const INITIAL_PROFILE: ProfileContent = {
       id: '2',
       school: "NIT Jamshedpur",
       degree: "BTech Electronics and Communication Engineering",
-      dates: "2015 - 2019",
+      dates: "2015 – 2019",
+      location: "Jamshedpur, India",
       description: [],
       logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178341/nitjsr_pue6hb.jpg"
     }
@@ -108,15 +110,9 @@ export const INITIAL_PROFILE: ProfileContent = {
       id: '5',
       name: "AI-Powered Profile Research Tool",
       description: "Discovers and researches candidate profiles using the Perplexity Agent API, scrapes LinkedIn activity via Apify, enriches career history via Bright Data, and surfaces outreach hooks through an embedded Claude drafting assistant. Persists research history to Supabase.",
+      link: "https://github.com/saicbm98/Claude_Code_Projects",
       stack: ["Claude Code", "Perplexity", "Apify", "Bright Data", "Streamlit", "Supabase"]
     },
-    {
-    id: '1',
-    name: "Sales Lead Enrichment",
-    description: "A form submission triggers an n8n workflow that researches the company, scores the lead, writes a draft outreach email, creates a HubSpot CRM record, and sends a Slack alert — all in under 90 seconds.",
-    link: "https://github.com/saicbm98/sales-lead-enrichment-n8n",
-    stack: ["n8n", "AI agent", "HubSpot", "Slack", "Workflow automation"]
-},
     {
       id: '2',
       name: "QueueSense",
@@ -125,18 +121,32 @@ export const INITIAL_PROFILE: ProfileContent = {
       stack: ["React", "TypeScript", "n8n", "OpenAI", "Webhooks"]
     },
     {
-      id: '3',
-      name: "Company Research Automation",
-      description: "Paste a company URL into a form and get a structured research report in Google Docs within 5 minutes. Scrapes the site, runs GPT analysis, and outputs outreach-ready intelligence.",
-      link: "https://github.com/saicbm98/Company-Info-Research-Automation-n8n-Workflow",
-      stack: ["n8n", "OpenAI", "Google Docs", "Web scraping", "Prompt engineering"]
+      id: '6',
+      name: "Multi-Agent Topic Research Orchestrator",
+      description: "An n8n workflow that runs a two agent research pipeline across a list of topics. One agent pulls the latest headlines on each topic from NewsAPI, a second agent summarises them with OpenAI, and the results are merged into a single formatted HTML digest sent by email.",
+      link: "https://github.com/saicbm98/n8n-multi-agent-research-orchestrator",
+      stack: ["n8n", "NewsAPI", "OpenAI", "Multi-agent", "Gmail"]
+    },
+    {
+      id: '1',
+      name: "Sales Lead Enrichment",
+      description: "A form submission triggers an n8n workflow that researches the company, scores the lead, writes a draft outreach email, creates a HubSpot CRM record, and sends a Slack alert — all in under 90 seconds.",
+      link: "https://github.com/saicbm98/sales-lead-enrichment-automation",
+      stack: ["n8n", "AI agent", "HubSpot", "Slack", "Workflow automation"]
     },
     {
       id: '4',
       name: "Email Alarm System",
       description: "n8n workflow that monitors Gmail every 15 minutes, filters by sender whitelist, domain, and keywords, and fires an emergency Pushover alert that bypasses Do Not Disturb.",
-      link: "https://github.com/saicbm98/nz-email-alarm-alert-system",
+      link: "https://github.com/saicbm98/NZ-email-alarm-system",
       stack: ["n8n", "Gmail API", "Pushover", "JavaScript", "Workflow automation"]
+    },
+    {
+      id: '3',
+      name: "Company Research Automation",
+      description: "Paste a company URL into a form and get a structured research report in Google Docs within 5 minutes. Scrapes the site, runs GPT analysis, and outputs outreach-ready intelligence.",
+      link: "https://github.com/saicbm98/Company-Info-Research-Automation-n8n-Workflow",
+      stack: ["n8n", "OpenAI", "Google Docs", "Web scraping", "Prompt engineering"]
     }
   ],
   skills: [
