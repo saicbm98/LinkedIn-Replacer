@@ -42,4 +42,4 @@ View your app in AI Studio: https://ai.studio/apps/drive/1ksexGDzwrQ7dARAdzxVWkB
 ---
 
 ### ⚡ Built with determination
-*After losing LinkedIn access, I chose to build instead of complain. This is one of several projects showcasing AI automation, prompt engineering, and rapid product development.*
+*This is one of several projects showcasing AI automation, prompt engineering, and AI-led product development.*
