@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    match /conversations/{conversationId} {
+      // No client request, authenticated or not, is ever allowed to list or read the full conversations collection
+      allow list: if false;
+
+      // A visitor can read (get) a conversation only if they know the specific document ID
+      allow get: if true;
+
+      // A visitor can create a new conversation
+      allow create: if request.resource.data.visitorToken != null;
+
+      // A visitor can write (update) to a conversation only if the request includes a matching visitorToken
+      allow update: if resource != null && request.resource != null && resource.data.visitorToken == request.resource.data.visitorToken;
+
+      // Deletions are not allowed from any client
+      allow delete: if false;
+    }
+  }
+}

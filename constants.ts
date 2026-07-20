@@ -1,81 +1,87 @@
 import { ProfileContent } from './types';
 
-export const ADMIN_PASSWORD = "admin123";
-export const RECOVERY_CODE = "recovery";
+export const INITIAL_PROFILE_VERSION = 4; // Increment this to force reset visitor's local storage
 
 export const INITIAL_PROFILE: ProfileContent = {
   name: "Sai Medicherla",
-  headline: "AI Automation & Ops Specialist | n8n Workflows | I build practical automation to reduce manual ops and help and help teams scale faster",
+  headline: "Operations & Process Improvement Specialist | Experience in Insurance + Tech | I improve processes and help teams work more efficiently, saving cost and time | AI workflow builder",
   location: "New Zealand",
-  shortSummary: "I streamline manual workflows and help teams scale using Airtable, Zapier, and Gen AI tools.",
-  aboutLong: "Thanks for stopping by. 👋\n\nI'm a technical ops analyst who turns messy processes into workable systems using automation and practical AI tools.\n\nI have 2+ years of experience in ops-heavy analyst roles across insurance, customer operations, and higher education. My background combines a Bachelor's in Electronics & Communication Engineering with an MSc in International Relations from the University of Bristol, so I'm super comfortable moving quickly between technical details and business priorities, and between teams when things get stuck.\n\nI'm obsessed with spotting process and product inefficiencies, then fixing them with AI automation and no-code platforms like n8n, Zapier, and Airtable. Recently, I recently built QueueSense, an AI-assisted customer support ticketing workflow, plus this website and several end-to-end n8n automations that eliminated repetitive manual work. Many more to come!\n\nI'm equally comfortable strategising an approach or getting my hands dirty in the weeds of implementation, whatever the problem needs.\n\nIf you're looking for an AI-confident operator who can turn messy ideas into workable systems using automation and AI, I'd love to chat!",
+  shortSummary: "Operations and process improvement customer-facing professional with experience across insurance, technology and higher education.",
+  aboutLong: "Thanks for stopping by. 👋\n\nI'm an ops and process improvement professional with experience across insurance, technology, and higher education. Background in electronics engineering and international relations, so I'm comfortable moving between technical detail and a business-oriented mindset effortlessly.\n\nI have 2+ years in ops and ops-adjacent analyst roles, managing high volumes, maintaining accuracy under pressure, and working cross-functionally to find and solve process inefficiencies.\n\nI have built several end-to-end workflows, tools and websites using n8n, Google AI Studio, and Claude Code that simplify and automate manual work.",
   experience: [
     {
       id: '1',
-      company: "migreats",
-      title: "Operations and Product",
-      dates: "Jul 2025 - Sept 2025",
-      location: "London, UK (Remote)",
+      company: "Migreats",
+      title: "Operations Associate",
+      dates: "Jul 2025 - Sep 2025",
+      location: "Remote, UK",
       description: [
-        "Built and managed a guest sourcing and outreach pipeline for community events, tracking status and follow ups end to end.",
-        "Created webinar assets (slides, alignment docs, speaker briefs) and coordinated speaker comms and event logistics.",
-        "Systematised community operations with lightweight docs and repeatable workflows (templates, checklists, SOPs) to reduce back and forth."
+        "Coordinated end-to-end webinar operations for a 250+ member professional community, managing speaker outreach, scheduling, deck preparation and post-event reporting.",
+        "Reviewed and formalised internal workflows, drafting SOPs to improve operational clarity and consistency.",
+        "Analysed engagement data and collaborated with founders to trial AI-enabled tools and automation processes to enhance member experience and internal efficiency.",
+        "Contributed to refining operational strategy during a scaling phase."
       ],
-      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download.png?raw=true",
+      logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178341/migreats_hmuaxc.png",
       employmentType: "Contract"
     },
     {
       id: '2',
       company: "NFU Mutual",
-      title: "Insurance Analyst",
+      title: "Insurance Underwriter",
       dates: "Nov 2023 - Oct 2024",
       location: "Bristol, UK",
       description: [
-        "Led data analysis for 1500+ policies worth £30 million+, collaborating with internal stakeholders to maintain data quality and accuracy, negotiate terms and make effective policy decisions.",
-        "Forecasted policy risk using 100+ data points in Excel, leveraging the insights to underwrite 4 policies/hour with accurate, high-quality decisions.",
-        "Collaborated cross-functionally with Claims, Sales and IT teams to optimise and automate key internal processes, reducing the overall policy processing time by 30%.",
-        "Identified key operational bottlenecks and proposed an AI-powered referral tool, cutting referral handling time by 20% and initiating broader conversations on using AI to streamline ops and improve delivery."
+        "Assessed 1,500 policies across new business, renewals and mid-term adjustments, maintaining strict compliance and risk standards.",
+        "Consistently exceeded productivity targets, averaging 4 policies per hour while maintaining high data accuracy.",
+        "Collaborated with Claims, Sales and IT teams to resolve complex cases and reduce policy processing time.",
+        "Identified inefficiencies in referral workflows and proposed a digital improvement initiative that reduced turnaround delays.",
+        "Maintained strong broker relationships, supporting accurate documentation and commercial negotiation of terms."
       ],
-      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download%20(1).png?raw=true",
+      logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178341/nfu-mutual_bcvbmi.png",
       employmentType: "Full-time"
     },
     {
       id: '3',
-      company: "Vue UK and Ireland",
-      title: "Customer Operations Analyst",
+      company: "Vue UK & Ireland",
+      title: "Customer Assistant",
       dates: "Mar 2023 - Oct 2023",
       location: "Bristol, UK",
       description: [
-        "Analysed 5+ parameters of customer feedback data, identifying operational bottlenecks and implementing solutions that cut response times by 20% while maintaining 90%+ customer satisfaction."
+        "Delivered front-line customer service in a high-volume cinema environment.",
+        "Managed peak-period operations across ticketing and retail, maintaining service standards under pressure.",
+        "Resolved customer queries and complaints in line with company policy."
       ],
-      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download%20(2).png?raw=true",
+      logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178340/vue_kovssl.png",
       employmentType: "Full-time"
     },
     {
       id: '4',
       company: "University of Bristol",
-      title: "Student Experience Quality Analyst",
+      title: "Student Experience Quality Reviewer",
       dates: "Nov 2021 - May 2022",
       location: "Bristol, UK",
       description: [
-        "Analysed the University Quality Framework based on feedback from 1000+ students, leveraging data insights to present 10+ process enhancements to senior department members.",
-        "Established and maintained strong relationships with 5+ key stakeholders, resolving 80% of identified issues and driving a 20% improvement in student satisfaction scores."
+        "Analysed structured feedback from 1,000+ students as part of academic quality assurance reviews.",
+        "Identified recurring service gaps and presented findings to academic leadership.",
+        "Prepared summary reports outlining improvement actions and recommendations.",
+        "Supported cross-department collaboration to improve student satisfaction outcomes."
       ],
-      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download%20(4).png?raw=true",
+      logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178340/bristol_vibybq.png",
       employmentType: "Part-time"
     },
     {
       id: '5',
       company: "Analog Devices",
-      title: "Firmware Data Intern",
+      title: "Firmware Engineering Intern",
       dates: "Jul 2020 - May 2021",
       location: "Bangalore, India",
       description: [
-        "Built a new data framework that resolved 5+ inefficiencies, boosting overall product testing efficiency to 90%.",
-        "Delivered 95%+ accuracy while analysing large client datasets using our internal framework, supporting data-led decision-making across multiple projects.",
-        "Managed relationships with 10+ internal and external stakeholders, delivering 100+ technical solutions."
+        "Supported hardware validation and testing of automotive semiconductor products.",
+        "Designed a structured data framework that resolved five key inefficiencies and improved evaluation workflow efficiency to 90%.",
+        "Analysed technical datasets and collaborated with engineering teams to troubleshoot performance issues.",
+        "Coordinated with 10+ global stakeholders to support product delivery timelines."
       ],
-      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/Analog%20Devices.jpg?raw=true",
+      logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178341/analog-devices_bqtmol.jpg",
       employmentType: "Contract"
     }
   ],
@@ -85,59 +91,94 @@ export const INITIAL_PROFILE: ProfileContent = {
       school: "University of Bristol",
       degree: "MSc International Relations",
       dates: "2021 - 2022",
-      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/download%20(4).png?raw=true"
+      description: [],
+      logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178340/bristol_vibybq.png"
     },
     {
       id: '2',
       school: "NIT Jamshedpur",
       degree: "BTech Electronics and Communication Engineering",
       dates: "2015 - 2019",
-      logoUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/nitjsr.jpg?raw=true"
+      description: [],
+      logoUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178341/nitjsr_pue6hb.jpg"
     }
   ],
   projects: [
     {
-      id: '1',
-      name: "Pomodoro Accountability Bot (Discord)",
-      description: "Group focus tool for a peer job seeking circle with custom intervals. Posts live countdowns and breaks in a shared channel for lightweight accountability.",
-      stack: ["Process automation", "Workflow design", "Vibe coding", "Discord bot development", "Logging and debugging", "Deployment basics"],
-      link: "https://github.com/saicbm98"
+      id: '5',
+      name: "AI-Powered Profile Research Tool",
+      description: "Discovers and researches candidate profiles using the Perplexity Agent API, scrapes LinkedIn activity via Apify, enriches career history via Bright Data, and surfaces outreach hooks through an embedded Claude drafting assistant. Persists research history to Supabase.",
+      stack: ["Claude Code", "Perplexity", "Apify", "Bright Data", "Streamlit", "Supabase"]
     },
     {
+    id: '1',
+    name: "Sales Lead Enrichment",
+    description: "A form submission triggers an n8n workflow that researches the company, scores the lead, writes a draft outreach email, creates a HubSpot CRM record, and sends a Slack alert — all in under 90 seconds.",
+    link: "https://github.com/saicbm98/sales-lead-enrichment-n8n",
+    stack: ["n8n", "AI agent", "HubSpot", "Slack", "Workflow automation"]
+},
+    {
       id: '2',
-      name: "LinkedIn Replacer",
-      description: "A professional profile web app with integrated messaging, AI profile Q&A, and SOC evaluator. Features a clean, network-style UI for recruiters and hiring managers.",
-      stack: ["React", "TypeScript", "Tailwind CSS", "Gemini API", "Claude", "Workflow design", "Google AI Studio", "Debugging", "Vibe coding", "Database integration"],
-      link: "https://github.com/saicbm98"
+      name: "QueueSense",
+      description: "AI helper app for B2B SaaS support teams. Reads incoming tickets, summarises the issue, flags urgency, and drafts a reply so agents clear the queue faster.",
+      link: "https://github.com/saicbm98/QueSense---AI-powered-customer-ticketing",
+      stack: ["React", "TypeScript", "n8n", "OpenAI", "Webhooks"]
     },
     {
       id: '3',
-      name: "QueueSense",
-      description: "QueueSense is an AI helper app for support teams at B2B SaaS companies. It reads support tickets, shows the important details about each customer, and writes reply drafts so agents can clear the queue faster with less effort. It is a demo and portfolio project, but it should feel like a real support tool for a mid sized B2B SaaS company.",
-      stack: ["React", "Firebase", "Tailwind"],
-      link: "https://github.com/saicbm98/quesense"
+      name: "Company Research Automation",
+      description: "Paste a company URL into a form and get a structured research report in Google Docs within 5 minutes. Scrapes the site, runs GPT analysis, and outputs outreach-ready intelligence.",
+      link: "https://github.com/saicbm98/Company-Info-Research-Automation-n8n-Workflow",
+      stack: ["n8n", "OpenAI", "Google Docs", "Web scraping", "Prompt engineering"]
+    },
+    {
+      id: '4',
+      name: "Email Alarm System",
+      description: "n8n workflow that monitors Gmail every 15 minutes, filters by sender whitelist, domain, and keywords, and fires an emergency Pushover alert that bypasses Do Not Disturb.",
+      link: "https://github.com/saicbm98/nz-email-alarm-alert-system",
+      stack: ["n8n", "Gmail API", "Pushover", "JavaScript", "Workflow automation"]
     }
   ],
   skills: [
-    "n8n", "Excel", "Slack", "Gemini", "Operations Strategy", "Process Improvement", 
-    "Data Analysis", "No-Code Ops", "AI Automation", "Google AI Studio", 
-    "Strategic Planning", "Prompt Engineering"
+    "Process Improvement",
+    "Workflow Optimisation",
+    "Data Analysis",
+    "Customer Onboarding",
+    "Operations Strategy",
+    "SOP Development",
+    "Stakeholder Engagement",
+    "Operational Reporting",
+    "Operational Support Delivery",
+    "n8n",
+    "Claude Code",
+    "Claude Cowork",
+    "Process Mapping",
+    "Data Interpretation",
+    "FCA Compliance",
+    "Risk Assessment",
+    "Documentation",
+    "Excel",
+    "LexisNexis",
+    "Slack",
+    "Google AI Studio",
+    "Claude",
+    "Perplexity"
   ],
   whatLookingFor: [
-    "AI Operations, Automation Engineering, or Product Ops roles where I automate manual processes and build AI-powered operational systems",
-    "Teams that value shipping fast and solving messy operational problems"
+    "Looking for roles in operations, business analysis, process improvement, digital transformation or product, where the work involves identifying and solving operational inefficiencies and improving how the business functions day-to-day",
+    "Teams that value collaboration and operational efficiency, and who want someone who can contribute at both ends of the spectrum, from high-level planning with the business context in mind, right through to hands-on delivery"
   ],
   collaborateSubtitle: "Are you a founder, hiring manager or recruiter looking for someone who",
   collaborateBullets: [
-    "Fixes your operational headaches with AI-powered automation (n8n, Zapier, custom workflows)",
-    "Builds workflows that help you scale your team quickly and efficiently",
-    "Works across the full spectrum from high-level planning to hands-on implementation, whatever the problem needs"
+    "Can improve your business processes and keep your team operating at maximum efficiency",
+    "Can leverage AI and automation tools where needed to reduce costs, save time and improve how work gets done",
+    "Works across the full spectrum, from high-level planning to hands-on implementation, whatever is needed"
   ],
   contact: {
     email: "medicherlasaicharan@gmail.com",
     githubUrl: "https://github.com/saicbm98",
     whatsappLink: "https://wa.me/447436950058"
   },
-  avatarUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/IMG-20230227-WA0019.jpg?raw=true",
-  coverUrl: "https://github.com/saicbm98/LinkedIn-Replacer/blob/main/LinkedIn%20Background%20Photo.png?raw=true"
+  avatarUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178343/Profile_qboyg1.jpg",
+  coverUrl: "https://res.cloudinary.com/djcggerkx/image/upload/v1769178341/cover_trydyw.png"
 };

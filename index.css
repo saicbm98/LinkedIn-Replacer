@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-[#F3F2EF] text-gray-900;
+}
+
+.linkedin-card {
+  @apply bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden;
+}
+
+.linkedin-button-primary {
+  @apply bg-[#0A66C2] text-white font-semibold py-1.5 px-4 rounded-full hover:bg-[#004182] transition-colors;
+}
+
+.linkedin-button-secondary {
+  @apply border border-[#0A66C2] text-[#0A66C2] font-semibold py-1.5 px-4 rounded-full hover:bg-[#EBF4FE] transition-colors;
+}

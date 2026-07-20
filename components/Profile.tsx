@@ -1,53 +1,85 @@
 import { CustomCrispChat } from './CustomCrispChat.tsx';
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store.tsx';
-import { Link } from 'react-router-dom';
-import { MapPin, Link as LinkIcon, Send, Plus, Camera, Pencil, Briefcase, ChevronDown, Printer, Github, Mail, Zap, Bot, Rocket, ArrowRight, X, AlertTriangle } from 'lucide-react';
+import { MapPin, Link as LinkIcon, Send, Camera, Pencil, Briefcase, Printer, Github, Mail, Zap, ArrowRight, X } from 'lucide-react';
 import AIChatWidget from './AIChatWidget.tsx';
 
-const LogoImage = ({ logoUrl, name }: { logoUrl?: string, name: string }) => {
-  const [error, setError] = useState(false);
+/**
+ * A robust image component that handles errors and displays a placeholder.
+ */
+interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  fallbackType?: 'avatar' | 'cover' | 'logo';
+  fallbackText?: string;
+}
 
-  if (logoUrl && !error) {
+const SafeImage: React.FC<SafeImageProps> = ({ src, alt, className, fallbackType, fallbackText, ...props }) => {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  if (!src || error) {
+    if (fallbackType === 'avatar') {
+      return (
+        <div className={`flex items-center justify-center bg-gray-200 text-gray-400 font-bold text-2xl uppercase ${className}`}>
+          {fallbackText?.substring(0, 1) || '?'}
+        </div>
+      );
+    }
+    if (fallbackType === 'cover') {
+      return (
+        <div className={`bg-gradient-to-r from-gray-200 to-gray-300 w-full h-full flex items-center justify-center text-gray-400 font-medium ${className}`}>
+          {fallbackText || 'Cover Photo'}
+        </div>
+      );
+    }
     return (
-      <img 
-        src={logoUrl} 
-        alt={name} 
-        className="w-12 h-12 rounded object-contain bg-white border border-gray-100 flex-shrink-0"
-        onError={() => setError(true)}
-      />
+      <div className={`bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs border border-gray-200 uppercase ${className}`}>
+        {fallbackText?.substring(0, 2) || '??'}
+      </div>
     );
   }
 
   return (
-    <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 font-bold text-xs border border-gray-200 uppercase">
-      {name.substring(0,2)}
+    <div className={`relative overflow-hidden ${className}`}>
+      {loading && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
+      <img
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover transition-opacity duration-300 ${loading ? 'opacity-0' : 'opacity-100'}`}
+        onError={() => {
+          setError(true);
+          setLoading(false);
+        }}
+        onLoad={() => setLoading(false)}
+        {...props}
+      />
     </div>
   );
 };
 
+const LogoImage = ({ logoUrl, name }: { logoUrl?: string, name: string }) => {
+  return (
+    <SafeImage 
+      src={logoUrl} 
+      alt={name} 
+      fallbackType="logo"
+      fallbackText={name}
+      className="w-12 h-12 rounded bg-white border border-gray-100 flex-shrink-0"
+    />
+  );
+};
+
 const Profile: React.FC = () => {
-  const { profile, updateProfile, sendMessage, visitorToken, conversations, currentUser, simulateOwnerReply } = useStore();
+  const { profile, updateProfile, visitorToken, conversations, currentUser } = useStore();
   const [msgModalOpen, setMsgModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [showAllSkills, setShowAllSkills] = useState(false);
   
-  // Message form state
-  const [msgBody, setMsgBody] = useState('');
-  const [msgName, setMsgName] = useState('');
-  const [msgEmail, setMsgEmail] = useState('');
-  
-  const [sending, setSending] = useState(false);
-  const [sentSuccess, setSentSuccess] = useState(false);
-  const [lastConvId, setLastConvId] = useState<string | null>(null);
-
   // More menu state
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
-
-  const activeConversation = conversations.find(c => c.visitorToken === visitorToken);
 
   // Close more menu when clicking outside
   useEffect(() => {
@@ -59,20 +91,6 @@ const Profile: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleSendMessage = async () => {
-    if (!msgBody.trim()) return;
-    setSending(true);
-    const convId = await sendMessage(
-        activeConversation?.id || null, 
-        msgBody, 
-        'visitor',
-        { name: msgName, email: msgEmail }
-    );
-    setLastConvId(convId);
-    setSending(false);
-    setSentSuccess(true);
-  };
 
   const handlePrint = () => {
     setMoreMenuOpen(false);
@@ -128,7 +146,13 @@ const Profile: React.FC = () => {
         <div className="bg-white rounded-lg border border-[#E6E6E6] relative pb-6 shadow-sm group">
           {/* Cover Image */}
           <div className="h-32 md:h-48 bg-gray-300 w-full rounded-t-lg overflow-hidden relative group/cover">
-            <img src={profile.coverUrl} alt="Cover" className="w-full h-full object-cover" />
+            <SafeImage 
+              src={profile.coverUrl} 
+              alt="Cover" 
+              fallbackType="cover"
+              fallbackText="Sai Medicherla"
+              className="w-full h-full"
+            />
             {currentUser === 'owner' && (
               <button 
                 onClick={() => coverInputRef.current?.click()}
@@ -147,7 +171,13 @@ const Profile: React.FC = () => {
             {/* Avatar */}
             <div className="absolute -top-16 md:-top-24 left-6">
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[6px] border-white overflow-hidden bg-white shadow-sm relative group/avatar">
-                <img src={profile.avatarUrl} alt={profile.name} className="w-full h-full object-cover" />
+                <SafeImage 
+                  src={profile.avatarUrl} 
+                  alt={profile.name} 
+                  fallbackType="avatar"
+                  fallbackText={profile.name}
+                  className="w-full h-full"
+                />
                 {currentUser === 'owner' && (
                   <div 
                     onClick={() => avatarInputRef.current?.click()}
@@ -181,7 +211,7 @@ const Profile: React.FC = () => {
                   onClick={() => setMsgModalOpen(true)}
                   className="bg-[#0A66C2] text-white px-5 py-1.5 rounded-full font-semibold hover:bg-[#004182] transition-colors flex items-center gap-2"
                 >
-                  <Send className="w-4 h-4 rotate-[45deg] mb-0.5" /> Message
+                  <Send className="w-4 h-4" /> Message
                 </button>
                 
                 <div className="relative" ref={moreMenuRef}>
@@ -353,15 +383,22 @@ const Profile: React.FC = () => {
         <div className="bg-white rounded-lg border border-[#E6E6E6] p-5 shadow-sm">
             <h2 className="font-bold text-[17px] text-[#1A1A1A] mb-4">Skills</h2>
             <div className="space-y-4">
-                {profile.skills.slice(0, 10).map((skill, i) => (
+                {(showAllSkills ? profile.skills : profile.skills.slice(0, 10)).map((skill, i) => (
                     <div key={i} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
                         <span className="text-[15px] font-bold text-gray-700">{skill}</span>
                     </div>
                 ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-                 <button className="text-[#666666] font-bold text-[14px] hover:text-[#1A1A1A] w-full">Show all skills</button>
-            </div>
+            {profile.skills.length > 10 && (
+                <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+                     <button 
+                        onClick={() => setShowAllSkills(!showAllSkills)}
+                        className="text-[#0A66C2] font-bold text-[14px] hover:underline w-full"
+                     >
+                        {showAllSkills ? "Show less" : `Show all ${profile.skills.length} skills`}
+                     </button>
+                </div>
+            )}
         </div>
 
         {/* AI Assistant Widget */}
@@ -377,9 +414,7 @@ const Profile: React.FC = () => {
              </div>
         </div>
 
-        <div className="text-[12px] text-center text-gray-500 py-4 print:hidden">
-            LinkedIn Replacer © {new Date().getFullYear()}
-        </div>
+
       </div>
 
       <CustomCrispChat 

@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { ProfileContent, Conversation, Message, MessageStatus, FirebaseConfig } from './types.ts';
-import { INITIAL_PROFILE, ADMIN_PASSWORD } from './constants.ts';
+import { INITIAL_PROFILE, INITIAL_PROFILE_VERSION } from './constants.ts';
 import { checkSpam } from './services/geminiService.ts';
-import { initFirebase, subscribeToConversations, saveConversationToFirestore, updateConversationInFirestore } from './services/firebaseService.ts';
+import { initFirebase, saveConversationToFirestore, updateConversationInFirestore } from './services/firebaseService.ts';
+import firebaseAppletConfig from './firebase-applet-config.json';
 
 interface StoreContextType {
   profile: ProfileContent;
@@ -11,11 +12,7 @@ interface StoreContextType {
   sendMessage: (conversationId: string | null, body: string, sender: 'visitor' | 'owner', visitorDetails?: { name?: string; email?: string }) => Promise<string>;
   markAsRead: (conversationId: string) => void;
   currentUser: 'visitor' | 'owner';
-  setCurrentUser: (user: 'visitor' | 'owner') => void;
-  logout: () => void;
   visitorToken: string;
-  verifyPassword: (password: string) => boolean;
-  changePassword: (newPass: string) => void;
   simulateOwnerReply: (conversationId: string) => void;
   createTestConversation: () => void;
   firebaseConfig: FirebaseConfig | null;
@@ -33,8 +30,17 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profile, setProfile] = useState<ProfileContent>(() => {
     try {
+      const storedVersion = localStorage.getItem('lr_profile_version');
       const stored = localStorage.getItem('lr_profile');
-      return stored ? JSON.parse(stored) : INITIAL_PROFILE;
+      
+      // If version mismatch or no stored profile, use INITIAL_PROFILE
+      if (!stored || !storedVersion || parseInt(storedVersion) < INITIAL_PROFILE_VERSION) {
+        localStorage.setItem('lr_profile_version', INITIAL_PROFILE_VERSION.toString());
+        localStorage.setItem('lr_profile', JSON.stringify(INITIAL_PROFILE));
+        return INITIAL_PROFILE;
+      }
+      
+      return JSON.parse(stored);
     } catch (e) {
       return INITIAL_PROFILE;
     }
@@ -60,8 +66,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
   const [isCrispTyping, setIsCrispTyping] = useState(false);
 
-  const [currentUser, setCurrentUser] = useState<'visitor' | 'owner'>('visitor');
-  const [adminPassword, setAdminPassword] = useState(() => localStorage.getItem('lr_admin_password') || ADMIN_PASSWORD);
+  const currentUser = 'visitor';
   
   const [visitorToken] = useState(() => {
     const stored = localStorage.getItem('lr_visitor_token');
@@ -72,10 +77,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const [firebaseConfig, setFirebaseConfigState] = useState<FirebaseConfig | null>(() => {
-      try {
-          const stored = localStorage.getItem('lr_firebase_config');
-          return stored ? JSON.parse(stored) : null;
-      } catch (e) { return null; }
+      return (firebaseAppletConfig as FirebaseConfig) || null;
   });
   const [isFirebaseConnected, setIsFirebaseConnected] = useState(false);
 
@@ -86,14 +88,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (firebaseConfig) {
           const success = initFirebase(firebaseConfig);
           setIsFirebaseConnected(success);
-          if (success) {
-              const unsubscribe = subscribeToConversations((remoteConversations) => {
-                  setConversations(remoteConversations);
-              });
-              return () => unsubscribe();
-          }
       }
   }, [firebaseConfig]);
+
+  // Load local conversations for visitor
+  useEffect(() => {
+      const stored = localStorage.getItem('lr_conversations');
+      setConversations(stored ? JSON.parse(stored) : []);
+  }, [isFirebaseConnected]);
 
   // Persistence
   useEffect(() => {
@@ -165,17 +167,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateProfile = (newProfile: ProfileContent) => {
     setProfile(newProfile);
-  };
-
-  const logout = () => {
-    setCurrentUser('visitor');
-  };
-
-  const verifyPassword = (input: string) => input === adminPassword;
-
-  const changePassword = (newPass: string) => {
-      setAdminPassword(newPass);
-      localStorage.setItem('lr_admin_password', newPass);
   };
 
   const sendMessage = async (
@@ -297,8 +288,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <StoreContext.Provider value={{
       profile, updateProfile, conversations, sendMessage, markAsRead,
-      currentUser, setCurrentUser, logout, visitorToken, verifyPassword,
-      changePassword, simulateOwnerReply, createTestConversation,
+      currentUser, visitorToken,
+      simulateOwnerReply, createTestConversation,
       firebaseConfig, setFirebaseConfig, isFirebaseConnected,
       crispMessages, isCrispTyping, sendCrispMessage
     }}>

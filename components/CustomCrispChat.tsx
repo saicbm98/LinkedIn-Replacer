@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Send, Minimize2, MessageCircle } from 'lucide-react';
 
@@ -34,7 +35,8 @@ export const CustomCrispChat: React.FC<CustomCrispChatProps> = ({ isOpen, onClos
   const [emailError, setEmailError] = useState('');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Fix: Replaced NodeJS.Timeout with any to avoid "Cannot find namespace 'NodeJS'" error in browser environments
+  const pollingIntervalRef = useRef<any>(null);
   const pushPermissionRequested = useRef(false);
 
   useEffect(() => {

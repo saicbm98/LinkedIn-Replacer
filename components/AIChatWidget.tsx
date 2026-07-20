@@ -10,11 +10,11 @@ const AIChatWidget: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const suggestedQuestions = [
-    `What is ${profile.name.split(' ')[0]}'s tech stack?`,
-    "Tell me about the Migreats role",
-    `Does ${profile.name.split(' ')[0]} know Python?`,
-    `What are ${profile.name.split(' ')[0]}'s core skills?`
-  ];
+  `What experience does ${profile.name.split(' ')[0]} have in operations?`,
+  `Has ${profile.name.split(' ')[0]} worked in insurance or risk roles?`,
+  `What kind of roles is ${profile.name.split(' ')[0]} looking for?`,
+  `Tell me about ${profile.name.split(' ')[0]}'s background`
+];
 
   const handleAsk = async (q: string) => {
     if (!q.trim()) return;

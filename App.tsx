@@ -5,7 +5,6 @@ import { StoreProvider } from './store.tsx';
 import Header from './components/Header.tsx';
 import Profile from './components/Profile.tsx';
 import Messaging from './components/Messaging.tsx';
-import Admin from './components/Admin.tsx';
 
 const App: React.FC = () => {
   return (
@@ -17,7 +16,6 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Profile />} />
               <Route path="/messages" element={<Messaging />} />
-              <Route path="/admin" element={<Admin />} />
             </Routes>
           </main>
         </div>

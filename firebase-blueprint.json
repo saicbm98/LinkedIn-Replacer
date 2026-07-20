@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a conversation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "conversationId": { "type": "string" },
+        "senderType": { "type": "string", "enum": ["visitor", "owner", "ai"] },
+        "body": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "flags": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "conversationId", "senderType", "body", "createdAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "A conversation between a visitor and the owner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "visitorName": { "type": "string" },
+        "visitorToken": { "type": "string" },
+        "lastMessageSnippet": { "type": "string" },
+        "updatedAt": { "type": "object" },
+        "unreadCount": { "type": "number" },
+        "status": { "type": "string" },
+        "messages": { "type": "array", "items": { "$ref": "#/entities/Message" } },
+        "createdAt": { "type": "object" }
+      },
+      "required": ["id", "visitorName", "visitorToken", "lastMessageSnippet", "updatedAt", "unreadCount", "status", "messages", "createdAt"]
+    }
+  },
+  "firestore": {
+    "conversations/{conversationId}": {
+      "schema": "Conversation",
+      "description": "Conversations stored in Firestore"
+    }
+  }
+}
